@@ -8,7 +8,7 @@ This repository contains the public browser interface. Published problems, hints
 
 ## Accounts and progress
 
-Guest practice saves in this browser. GitHub sign-in saves private progress through the existing Ohm backend when the sign-in provider is enabled. Existing ChatGPT learners can connect their progress at https://ohm-ee-practice.minwoopark2016.chatgpt.site/#account before starting a separate account. Guest progress imports only with your explicit choice. Reports and owner tools open the existing hosted workspace.
+Guest practice saves in this browser. GitHub sign-in creates a practice account directly on this website and saves private progress through the existing Ohm backend. Guest progress imports only with your explicit choice. Reports and owner tools open the existing hosted workspace.
 
 Browser sign-in storage shares the minpark830.github.io origin with other project sites; path names and storage prefixes do not isolate projects. Only publish trusted code on this origin. No GitHub repository permissions are requested.
 
