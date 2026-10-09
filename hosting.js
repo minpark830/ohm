@@ -25,7 +25,7 @@ export function usesAccountAuth(path,options={},hosting=HOSTING){
 export function requestTarget(path,options={},hosting=HOSTING){
   if(!hosting.externalFrontend)return path;
   const kind=routeKind(path,options.method);
-  if(!kind)throw new Error('Open hosted Ohm to use reports or owner tools.');
+  if(!kind)throw new Error('This request is unavailable from this website.');
   return hosting.apiOrigin+path.replace('/api/',kind==='public'?'/api/public/':'/api/pages/');
 }
 
