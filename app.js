@@ -1,17 +1,17 @@
-import {HOSTING,requestTarget,requestOptions,usesAccountAuth,hostedUrl} from './hosting.js';
-import {createInterview} from './interview.js';
-import {createInsights} from './insights.js';
-import {createPractice} from './practice.js';
-import {utcDate} from './practice-model.js';
-import {createAuth} from './auth.js';
-import {createGuestStore,isGuestStorageKey} from './guest-storage.js';
-import {createAdmin} from './admin.js';
-import {createFeedback} from './feedback.js';
-import {createLearnerStore} from './learner.js';
-import {createAccount} from './account.js';
-import {createSimulations} from './simulations.js';
-import {openDiagramViewer} from './diagram-viewer.js';
-import {diagramForProblem} from './problem-diagrams.js';
+import {HOSTING,requestTarget,requestOptions,usesAccountAuth,hostedUrl} from './hosting.js?v=6b69963bdb6b0b6f';
+import {createInterview} from './interview.js?v=6b69963bdb6b0b6f';
+import {createInsights} from './insights.js?v=6b69963bdb6b0b6f';
+import {createPractice} from './practice.js?v=6b69963bdb6b0b6f';
+import {utcDate} from './practice-model.js?v=6b69963bdb6b0b6f';
+import {createAuth} from './auth.js?v=6b69963bdb6b0b6f';
+import {createGuestStore,isGuestStorageKey} from './guest-storage.js?v=6b69963bdb6b0b6f';
+import {createAdmin} from './admin.js?v=6b69963bdb6b0b6f';
+import {createFeedback} from './feedback.js?v=6b69963bdb6b0b6f';
+import {createLearnerStore} from './learner.js?v=6b69963bdb6b0b6f';
+import {createAccount} from './account.js?v=6b69963bdb6b0b6f';
+import {createSimulations} from './simulations.js?v=6b69963bdb6b0b6f';
+import {openDiagramViewer} from './diagram-viewer.js?v=6b69963bdb6b0b6f';
+import {diagramForProblem} from './problem-diagrams.js?v=6b69963bdb6b0b6f';
 const app=document.querySelector('#app');
 const icon=(name,size=20)=>{const paths={grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',bolt:'<path d="m13 2-9 12h7l-1 8 10-12h-7l1-8Z"/>',chart:'<path d="M4 3v17h17M8 15l4-5 4 3 5-8"/>',book:'<path d="M6 3h12v19l-6-4-6 4V3Z"/>',search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>',shuffle:'<path d="m16 3 4 4-4 4M16 13l4 4-4 4M3 7h3c5 0 5 10 10 10h4M3 17h3c2 0 3-2 4-4M14 8c1-1 2-1 3-1h3"/>',circuit:'<path d="M2 12h4l2-5 3 10 3-10 3 10 2-5h3"/>',capacitor:'<path d="M2 12h7M9 5v14M15 5v14M15 12h7"/>',transistor:'<path d="M3 12h6M9 5v14M9 10l9-6V1M9 14l9 6v3M15 16l3 4-5-1"/>',mosfet:'<path d="M2 12h6M8 5v14M12 5v14M12 7h7V2M12 17h7v5M19 7v10M16 12h-4"/>',logic:'<path d="M4 5h6a7 7 0 0 1 0 14H4V5ZM1 8h3M1 16h3M17 12h6"/>',code:'<path d="m8 5-6 7 6 7M16 5l6 7-6 7M14 3l-4 18"/>',check:'<path d="m5 12 4 4L19 6"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',moon:'<path d="M20 14a9 9 0 0 1-10-11 9 9 0 1 0 10 11Z"/>',chevron:'<path d="m9 6 6 6-6 6"/>',left:'<path d="m15 6-6 6 6 6"/>',sun:'<circle cx="12" cy="12" r="4"/><path d="M12 1v2M12 21v2M1 12h2M21 12h2M4 4l2 2M18 18l2 2M4 20l2-2M18 6l2-2"/>',menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',close:'<path d="m6 6 12 12M6 18 18 6"/>',play:'<path d="m8 4 12 8-12 8V4Z"/>',bulb:'<path d="M9 18h6M10 22h4M8 14a7 7 0 1 1 8 0c-1 1-1 2-1 3H9c0-1 0-2-1-3Z"/>',reset:'<path d="M3 10a9 9 0 1 1 1 7M3 3v7h7"/>',help:'<circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 0 1 6 0c0 2-3 2-3 5M12 17v1"/>'};return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.bolt}</svg>`};
 const categories=[{name:'Circuit analysis',icon:'circuit',color:'#3d8a69',tint:'#eef7ef'},{name:'RC circuits',icon:'capacitor',color:'#bb9650',tint:'#faf4e6'},{name:'BJT',icon:'transistor',color:'#7894bf',tint:'#eef3fb'},{name:'MOSFET',icon:'mosfet',color:'#a182b7',tint:'#f4eef8'},{name:'Digital logic',icon:'logic',color:'#ca8a77',tint:'#fbf0ea'},{name:'HDL',icon:'code',color:'#658f94',tint:'#edf5f5'}];
@@ -20,7 +20,7 @@ async function api(path,options={}){const target=requestTarget(path,options),aut
 let problems=[],session={signedIn:false,isOwner:false},libraryError='',accountError='';
 try{
   const config=await api('/api/auth/config');
-  auth=await createAuth({config,externalFrontend:HOSTING.externalFrontend,createClient:config.enabled?(await import('./supabase-client.js')).createClient:null,onChange:change=>{if(uiReady&&session.provider==='supabase'&&change.subject!==auth.subject){learner.invalidateAuth();render();}}});
+  auth=await createAuth({config,externalFrontend:HOSTING.externalFrontend,createClient:config.enabled?(await import('./supabase-client.js?v=6b69963bdb6b0b6f')).createClient:null,onChange:change=>{if(uiReady&&session.provider==='supabase'&&change.subject!==auth.subject){learner.invalidateAuth();render();}}});
   session=await api('/api/session');
 }catch(e){accountError=e.message;if(!HOSTING.externalFrontend)libraryError=e.message;}
 try{problems=await api('/api/problems');}catch(e){libraryError=e.message;}

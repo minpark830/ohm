@@ -1,7 +1,7 @@
 import {
   interviewTopics, selectInterviewProblems, createInterviewSession,
   remainingMs, recordInterviewAnswer, finishInterview, sessionScore
-} from './interview-model.js';
+} from './interview-model.js?v=6b69963bdb6b0b6f';
 
 const presets = {
   mixed: {label: 'Mixed interview', note: 'A little of everything', topics: [...interviewTopics]},
