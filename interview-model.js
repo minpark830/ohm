@@ -61,7 +61,9 @@ export function createInterviewSession(problems, config = {}, now = Date.now()) 
   if (!timestamp(now)) throw new RangeError('Use a valid interview start time.');
   const questions = available(problems).map(problem => {
     const {answer, hints, explanation, formula, hdlOutputs, ...visible} = problem;
-    return structuredClone(visible);
+    const copy=structuredClone(visible);
+    if(Array.isArray(copy.parts))copy.parts=copy.parts.map(({id,label,unit})=>({id,label,unit}));
+    return copy;
   });
   if (!questions.length) throw new RangeError('Choose at least one available problem.');
   const minutes = boundedInteger(config.minutes, 30, 1, 180);
@@ -89,7 +91,7 @@ export function recordInterviewAnswer(session, receipt, now = Date.now()) {
   if (typeof pass !== 'boolean' || !timestamp(startedAt) || !timestamp(receivedAt) || !timestamp(now) || receivedAt < startedAt || receivedAt > now) throw new RangeError('Use a valid graded answer receipt.');
   const lastStart = session.endedAt === null ? session.deadline : Math.min(session.deadline, session.endedAt);
   if (startedAt < session.startedAt || startedAt >= lastStart) throw new RangeError('The answer was submitted outside the interview time.');
-  return {...session, answers: {...session.answers, [problemId]: {problemId, pass, startedAt, receivedAt}}};
+  return {...session, answers: {...session.answers, [problemId]: {problemId, pass, startedAt, receivedAt,...(typeof receipt.submissionId === 'string' ? {submissionId:receipt.submissionId} : {}),...(typeof receipt.assistance === 'string' ? {assistance:receipt.assistance} : {}),...(Number.isFinite(receipt.score)&&receipt.score>=0&&receipt.score<=1?{score:receipt.score}:{})}}};
 }
 
 /** Completion is fixed on the first call. Timeout always ends at the deadline. */

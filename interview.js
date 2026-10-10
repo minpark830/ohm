@@ -1,7 +1,7 @@
 import {
   interviewTopics, selectInterviewProblems, createInterviewSession,
   remainingMs, recordInterviewAnswer, finishInterview, sessionScore
-} from './interview-model.js?v=7673f412980e7053';
+} from './interview-model.js?v=92e728f30bc7fefd';
 
 const presets = {
   mixed: {label: 'Mixed interview', note: 'A little of everything', topics: [...interviewTopics]},
@@ -14,7 +14,7 @@ const timeLabel = milliseconds => {
 };
 
 export function createInterview({
-  shell, esc, icon, getProblems, getProgress, gradeAnswer, openProblem, navigate,
+  shell: renderShell, esc, icon, getProblems, getProgress, gradeAnswer, openProblem, navigate, storage = null,
   diagramForProblem, isActive, toast, now = () => Date.now(),
   schedule = (callback, milliseconds) => setInterval(callback, milliseconds), cancel = id => clearInterval(id)
 }) {
@@ -28,15 +28,60 @@ export function createInterview({
   let interval = null;
   let confirmingFinish = false;
   let finishNotice = '';
+  let history = [];
+  let hydrated = !storage;
 
   const hasActive = () => Boolean(session && session.endedAt === null);
-  const hasPending = () => Boolean(pending);
+  const hasPending = () => Boolean(pending || storage?.hasPending);
   const currentProblem = () => session?.problems[questionIndex];
   const badge = problem => `<span class="difficulty ${['Easy', 'Medium', 'Hard'].includes(problem.difficulty) ? problem.difficulty : ''}"><i class="difficulty-dot"></i>${esc(problem.difficulty)}</span>`;
   const refresh = () => { if (isActive()) render(); };
   const matchingProblems = () => getProblems().filter(problem =>
     problem.published !== false && problem.published !== 0 && config.topics.includes(problem.category) &&
     (config.difficulty === 'All levels' || problem.difficulty === config.difficulty));
+
+  function syncMarkup() {
+    if (!storage) return '';
+    const state = storage.status;
+    const message = state.error || (state.saving ? 'Saving your interview…' : state.pending ? 'Interview changes waiting to save…' : state.ready ? state.signedIn ? 'Interview saved to your account' : 'Interview saved in this browser' : 'Loading saved interviews…');
+    return `<div class="interview-sync ${state.error ? 'has-error' : ''}" data-interview-sync role="status"><span>${esc(message)}</span>${state.conflict ? '<button class="button" data-interview-action="load-saved">Load saved version</button>' : state.error ? '<button class="button" data-interview-action="retry-save">Retry saving</button>' : ''}</div>`;
+  }
+  const shell = content => renderShell(syncMarkup() + content);
+  function updateSyncStatus() {
+    if (!isActive()) return;
+    const element = document.querySelector('[data-interview-sync]');
+    if (element) element.outerHTML = syncMarkup();
+  }
+  function workspace() { return session ? {session, questionIndex, drafts, notes, finishNotice} : null; }
+  function persist() {
+    if (!storage || !hydrated) return;
+    while(history.length && new TextEncoder().encode(JSON.stringify({current:workspace(),history})).byteLength>450000)history.pop();
+    try { storage.set({current:workspace(), history}); }
+    catch (error) { toast(error.message); }
+  }
+  function restore() {
+    if (!storage?.status.ready || storage.status.authLost) return;
+    stopTimer();
+    const value = storage.state;
+    history = value.history || [];
+    const saved = value.current;
+    session = saved?.session || null;
+    questionIndex = saved?.questionIndex || 0; drafts = saved?.drafts || {}; notes = saved?.notes || {};
+    finishNotice = saved?.finishNotice || ''; errors = {}; pending = null; confirmingFinish = false;
+    hydrated = true;
+    if (hasActive()) {
+      if (remainingMs(session, now()) === 0) { session=finishInterview(session,'timeout',now()); persist(); }
+      else interval=schedule(tick,1000);
+    }
+  }
+  function editable() { return !storage || storage.status.ready && !storage.status.authLost && !storage.status.conflict; }
+  function archiveCurrent() {
+    if (session?.endedAt !== null && session) history=[workspace(), ...history.filter(item=>item.session.id!==session.id)].slice(0,20);
+  }
+  function historyMarkup() {
+    if (!history.length) return '';
+    return `<section class="interview-card interview-history"><div class="interview-work-heading"><h2>Recent interviews</h2><span>Last ${history.length}</span></div><ul>${history.map(item=>{const score=sessionScore(item.session,now());return `<li><div><strong>${esc(new Date(item.session.startedAt).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}))}</strong><span>${score.accepted} / ${score.total} accepted · ${timeLabel(score.elapsedMs)}</span></div><button class="button" data-interview-history="${esc(item.session.id)}">View results</button></li>`;}).join('')}</ul></section>`;
+  }
 
   function stopTimer() {
     if (interval !== null) cancel(interval);
@@ -58,6 +103,7 @@ export function createInterview({
   function finish(reason = 'finished') {
     if (!hasActive()) return;
     session = finishInterview(session, reason, now());
+    persist();
     confirmingFinish = false;
     stopTimer();
     if (isActive()) render();
@@ -97,13 +143,17 @@ export function createInterview({
         <label class="interview-prefer"><input type="checkbox" data-interview-config="preferUnsolved" ${config.preferUnsolved ? 'checked' : ''}><span><strong>Prioritize unsolved problems</strong><small>Use solved problems when more questions are needed.</small></span></label>
         <div class="interview-pool" role="status"><span>${icon('grid', 16)}<strong>${pool.length}</strong> matching ${pool.length === 1 ? 'problem' : 'problems'} <span class="muted">· ${fresh} unsolved</span></span>${!pool.length ? '<p>Choose a topic or a different difficulty to get started.</p>' : pool.length < config.count ? `<p>Your filters match ${pool.length} ${pool.length === 1 ? 'question' : 'questions'}. This interview will use all of them.</p>` : ''}</div>
         <button class="button primary interview-start" data-interview-action="start" ${count ? '' : 'disabled'}>${icon('play', 16)}Start ${count || config.count}-question interview<span>${config.minutes} min</span></button>
-      </section><aside class="interview-setup-aside"><section class="interview-rules"><span class="eyebrow">YOUR INTERVIEW, AT A GLANCE</span><h2>Room to reason.<br>A little time pressure.</h2><ol><li><span>1</span><div><strong>One final answer per question</strong><p>Move between questions and keep drafts before you submit.</p></div></li><li><span>2</span><div><strong>Feedback at the finish</strong><p>No hints or solutions in the interview. Review your answers together at the end.</p></div></li><li><span>3</span><div><strong>Keep the practice that counts</strong><p>Submitted answers save through your usual progress settings.</p></div></li></ol><div class="interview-tab-note">${icon('bulb', 17)}<p>The timer keeps running if you browse elsewhere in Ohm. Refreshing or closing this tab ends the session; drafts and the scorecard stay only in this tab.</p></div></section><p class="interview-measure-note">A practice score is a snapshot of these questions, not a measure of job readiness.</p></aside></div>
-    </div>`);
+      </section><aside class="interview-setup-aside"><section class="interview-rules"><span class="eyebrow">YOUR INTERVIEW, AT A GLANCE</span><h2>Room to reason.<br>A little time pressure.</h2><ol><li><span>1</span><div><strong>One final answer per question</strong><p>Move between questions and keep drafts before you submit.</p></div></li><li><span>2</span><div><strong>Feedback at the finish</strong><p>No hints or solutions in the interview. Review your answers together at the end.</p></div></li><li><span>3</span><div><strong>Keep the practice that counts</strong><p>Submitted answers save through your usual progress settings.</p></div></li></ol><div class="interview-tab-note">${icon('bulb', 17)}<p>The timer keeps running if you browse elsewhere in Ohm. Saved interviews resume after a refresh. The deadline keeps running while you are away. Guest interviews stay in this browser; signed-in interviews follow your account.</p></div></section><p class="interview-measure-note">A practice score is a snapshot of these questions, not a measure of job readiness.</p></aside></div>
+    ${historyMarkup()}</div>`);
   }
 
   function answerFields(problem, locked) {
     const value = drafts[problem.id] || '';
     const disabled = locked ? 'disabled' : '';
+    if (problem.type === 'multipart') {
+      let parts={};try { const parsed=JSON.parse(value||'{}');if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))parts=parsed; } catch {}
+      return `<div class="interview-multipart">${(problem.parts||[]).map(part=>`<label class="answer-label" for="interview-part-${esc(part.id)}">${esc(part.label)}<div class="answer-input"><input id="interview-part-${esc(part.id)}" data-interview-answer="${problem.id}" data-interview-part="${esc(part.id)}" type="text" autocomplete="off" maxlength="150" placeholder="Value or expression" value="${esc(Object.hasOwn(parts,part.id)?parts[part.id]:'')}" ${disabled}><span>${esc(part.unit||'')}</span></div></label>`).join('')}</div><p class="hint-text">Include a unit or use the unit shown. Submit all parts together.</p>`;
+    }
     if (problem.type === 'choice') return `<fieldset class="interview-answer-options" ${disabled}><legend class="answer-label">Choose your answer</legend>${(problem.options || []).map((option, index) => `<label class="choice"><input type="radio" name="interview-answer" value="${index}" data-interview-answer="${problem.id}" ${value === String(index) ? 'checked' : ''}><span>${esc(option)}</span></label>`).join('')}</fieldset>`;
     if (problem.type === 'hdl') return `<label class="answer-label" for="interview-answer">Verilog · continuous assignment</label><textarea id="interview-answer" data-interview-answer="${problem.id}" class="code-editor" maxlength="2500" spellcheck="false" autocomplete="off" placeholder="assign y = …;" ${disabled}>${esc(value)}</textarea><p class="code-description">One-bit, 0/1 truth-table checker. Supports ~ ! &amp; ^ | &amp;&amp; || == != and ?: . No module declarations, timing, or X/Z simulation.</p>`;
     return `<label class="answer-label" for="interview-answer">Your answer</label><div class="answer-input"><input id="interview-answer" data-interview-answer="${problem.id}" type="text" inputmode="decimal" autocomplete="off" maxlength="2500" placeholder="Enter a value" value="${esc(value)}" ${disabled}><span>${esc(problem.unit || '')}</span></div><p class="hint-text">Use ${esc(problem.unit || 'the requested units')}.${Number.isFinite(problem.tolerance) ? ` Accepted tolerance: ±${esc(problem.tolerance)} ${esc(problem.unit || '')}.` : ''}</p>`;
@@ -121,8 +171,8 @@ export function createInterview({
       <div class="interview-question-toolbar"><nav class="interview-question-nav" aria-label="Interview questions">${session.problems.map((item, index) => `<button type="button" data-interview-question="${index}" class="${index === questionIndex ? 'is-current' : ''} ${Object.hasOwn(session.answers, item.id) ? 'is-submitted' : ''}" ${index === questionIndex ? 'aria-current="step"' : ''} aria-label="Question ${index + 1}${Object.hasOwn(session.answers, item.id) ? ', submitted' : pending?.problemId === item.id ? ', checking' : drafts[item.id] ? ', draft saved' : ', unanswered'}">${Object.hasOwn(session.answers, item.id) ? icon('check', 14) : index + 1}</button>`).join('')}</nav><button class="button" data-interview-action="finish">Finish interview</button></div>
       ${confirmingFinish ? `<section class="interview-finish-confirm" role="region" aria-label="Confirm finish"><div><strong>Finish and see your results?</strong><p>${session.problems.length - submittedCount} ${session.problems.length - submittedCount === 1 ? 'question has' : 'questions have'} no final answer yet.${pending ? ' Your current submission will still be counted when it finishes checking.' : ''} Drafts will not be submitted.</p></div><div><button class="button" data-interview-action="keep-going">Keep going</button><button class="button primary" data-interview-action="confirm-finish">Finish now</button></div></section>` : ''}
       <div class="interview-workspace"><section class="interview-card interview-question" aria-labelledby="interview-question-title"><span class="eyebrow">QUESTION ${questionIndex + 1} OF ${session.problems.length} · ${esc(problem.category)}</span><h2 id="interview-question-title" tabindex="-1">${esc(problem.title)}</h2><div class="problem-meta">${badge(problem)}${submitted ? '<span class="interview-submitted">Answer submitted</span>' : ''}</div><p class="interview-prompt">${esc(problem.prompt)}</p>${diagram ? `<figure class="problem-diagram">${diagram.svg}<figcaption>${esc(diagram.caption)}</figcaption><button class="diagram-expand" data-diagram-view>Enlarge diagram</button></figure>` : ''}${Array.isArray(problem.given) && problem.given.length ? `<div class="given-grid">${problem.given.map(given => `<div class="given"><small>${esc(given.label)}</small><strong>${esc(given.value)}</strong></div>`).join('')}</div>` : ''}<div class="task-box">${esc(problem.task)}</div></section>
-      <section class="interview-work"><form id="interview-answer-form" class="interview-card interview-answer"><div class="interview-work-heading"><h2>Your final answer</h2><span>One submission</span></div>${answerFields(problem, submitted || Boolean(pending))}${submitted ? `<p class="interview-answer-state" role="status">${icon('check', 16)}Answer recorded. You’ll see the result when the interview ends.</p>` : `<button type="submit" class="button primary" ${pending ? 'disabled' : ''}>${checking ? 'Checking submission…' : pending ? 'Another answer is checking…' : 'Submit final answer'}${pending ? '' : icon('check', 15)}</button>`}${errors[problem.id] ? `<p class="interview-error" role="alert">${esc(errors[problem.id])}</p>` : ''}<p class="interview-private-note">${submitted ? 'This answer is locked for this interview.' : 'Submitting locks this answer. You can skip and return before time runs out.'}</p></form><section class="interview-card interview-notes"><label for="interview-notes">Scratchpad <span>Only in this tab</span></label><textarea id="interview-notes" data-interview-note="${problem.id}" maxlength="10000" placeholder="Start with what you know. Write equations and work through your reasoning…">${esc(notes[problem.id] || '')}</textarea></section><div class="interview-question-controls"><button class="button" data-interview-question="${questionIndex - 1}" ${questionIndex === 0 ? 'disabled' : ''}>${icon('left', 15)}Previous</button><button class="button" data-interview-question="${next}">${submitted ? 'Next question' : 'Skip for now'}${icon('chevron', 15)}</button></div></section></div>
-      <p class="interview-active-note">Refreshing ends this session. Your submitted answers save normally; unsubmitted drafts stay in this tab.</p>
+      <section class="interview-work"><form id="interview-answer-form" class="interview-card interview-answer"><div class="interview-work-heading"><h2>Your final answer</h2><span>One submission</span></div>${answerFields(problem, submitted || Boolean(pending))}${submitted ? `<p class="interview-answer-state" role="status">${icon('check', 16)}Answer recorded. You’ll see the result when the interview ends.</p>` : `<button type="submit" class="button primary" ${pending ? 'disabled' : ''}>${checking ? 'Checking submission…' : pending ? 'Another answer is checking…' : 'Submit final answer'}${pending ? '' : icon('check', 15)}</button>`}${errors[problem.id] ? `<p class="interview-error" role="alert">${esc(errors[problem.id])}</p>` : ''}<p class="interview-private-note">${submitted ? 'This answer is locked for this interview.' : 'Submitting locks this answer. You can skip and return before time runs out.'}</p></form><section class="interview-card interview-notes"><label for="interview-notes">Scratchpad <span>Saved with this interview</span></label><textarea id="interview-notes" data-interview-note="${problem.id}" maxlength="10000" placeholder="Start with what you know. Write equations and work through your reasoning…">${esc(notes[problem.id] || '')}</textarea></section><div class="interview-question-controls"><button class="button" data-interview-question="${questionIndex - 1}" ${questionIndex === 0 ? 'disabled' : ''}>${icon('left', 15)}Previous</button><button class="button" data-interview-question="${next}">${submitted ? 'Next question' : 'Skip for now'}${icon('chevron', 15)}</button></div></section></div>
+      <p class="interview-active-note">Your saved drafts, scratchpad, and scorecard resume after a refresh. The timer keeps running while you are away.</p>
     </div>`);
   }
 
@@ -134,15 +184,19 @@ export function createInterview({
       <div class="interview-results-layout"><section class="interview-card interview-results"><div class="interview-work-heading"><h2>Question by question</h2><span>First submitted answer</span></div><ol>${session.problems.map((problem, index) => {
         const answer = session.answers[problem.id];
         const checking = pending?.problemId === problem.id;
-        const state = checking ? 'Checking' : answer ? (answer.pass ? 'Accepted' : 'Not accepted') : 'Unanswered';
+        const state = checking ? 'Checking' : answer ? (answer.pass ? 'Accepted' : answer.score>0 ? `Partial · ${Math.round(answer.score*100)}%` : 'Not accepted') : 'Unanswered';
+        const assistance=answer?.assistance==='hint'?'Previously viewed hint':answer?.assistance==='solution'?'Previously viewed solution':answer?.assistance==='independent'?'No help recorded for this version':'';
         const color = checking ? 'pending' : answer ? (answer.pass ? 'accepted' : 'retry') : 'unanswered';
-        return `<li><span class="interview-result-number">${String(index + 1).padStart(2, '0')}</span><div><strong>${esc(problem.title)}</strong><p><span class="interview-result-state is-${color}">${state}</span><span>·</span>${esc(problem.category)}</p></div><button class="button" data-interview-review="${problem.id}" ${checking ? 'disabled' : ''}>Review${icon('chevron', 14)}</button></li>`;
-      }).join('')}</ol></section><aside class="interview-card interview-topic-results"><h2>By topic</h2>${Object.entries(score.byTopic).map(([topic, counts]) => `<div class="interview-topic-result"><div><span>${esc(topic)}</span><strong>${counts.accepted} / ${counts.total}</strong></div><div class="interview-topic-track" role="meter" aria-label="${esc(topic)} accepted answers" aria-valuemin="0" aria-valuemax="${counts.total}" aria-valuenow="${counts.accepted}"><span style="width:${counts.percent}%"></span></div></div>`).join('')}<p>Accepted answers show what checked out in this session. Open a question to compare the reasoning and practice again.</p><button class="button" data-view="review">Open review queue${icon('chevron', 14)}</button></aside></div><p class="interview-measure-note">This scorecard stays in this tab. Submitted answers contribute to your normal practice progress. Scores are practice feedback, not a measure of job readiness.</p></div>`);
+        return `<li><span class="interview-result-number">${String(index + 1).padStart(2, '0')}</span><div><strong>${esc(problem.title)}</strong><p><span class="interview-result-state is-${color}">${state}</span><span>·</span>${esc(problem.category)}${assistance ? `<span>·</span><span>${assistance}</span>` : ''}</p></div><button class="button" data-interview-review="${problem.id}" ${checking ? 'disabled' : ''}>Review${icon('chevron', 14)}</button></li>`;
+      }).join('')}</ol></section><aside class="interview-card interview-topic-results"><h2>By topic</h2>${Object.entries(score.byTopic).map(([topic, counts]) => `<div class="interview-topic-result"><div><span>${esc(topic)}</span><strong>${counts.accepted} / ${counts.total}</strong></div><div class="interview-topic-track" role="meter" aria-label="${esc(topic)} accepted answers" aria-valuemin="0" aria-valuemax="${counts.total}" aria-valuenow="${counts.accepted}"><span style="width:${counts.percent}%"></span></div></div>`).join('')}<p>Accepted answers show what checked out in this session. Open a question to compare the reasoning and practice again.</p><button class="button" data-view="review">Open review queue${icon('chevron', 14)}</button></aside></div><p class="interview-measure-note">This scorecard is saved with your interview history. Submitted answers contribute to your normal practice progress. Scores are practice feedback, not a measure of job readiness.</p>${historyMarkup()}</div>`);
   }
 
   function render() {
+    if (!hydrated && storage?.status.ready) restore();
+    if (storage && !storage.status.ready) { shell('<div class="page"><h1>Your interviews are loading.</h1><p>Wait for your saved sessions before starting a new interview.</p></div>');return; }
     if (hasActive() && remainingMs(session, now()) === 0) {
       session = finishInterview(session, 'timeout', now());
+      persist();
       stopTimer();
     }
     if (!session) setupPage();
@@ -151,20 +205,24 @@ export function createInterview({
   }
 
   function start() {
-    if (hasActive() || pending) return;
+    if (hasActive() || pending || !editable()) return;
     const selected = selectInterviewProblems(getProblems(), getProgress(), config);
     if (!selected.length) { toast('Choose a topic and difficulty with available problems.'); return; }
+    archiveCurrent();
     discard();
     session = createInterviewSession(selected, config, now());
     interval = schedule(tick, 1000);
+    persist();
     render();
     document.querySelector('#interview-question-title')?.focus({preventScroll: true});
   }
 
   async function submitAnswer() {
-    if (!hasActive() || pending) return;
+    if (!hasActive() || pending || !editable()) return;
     if (remainingMs(session, now()) === 0) { finish('timeout'); return; }
     const problem = currentProblem();
+    const live=getProblems().find(item=>item.id===problem.id && item.published!==false && item.published!==0);
+    if (!live || live.version!==problem.version) {errors[problem.id]='This question changed or is no longer available. Finish this interview and start another with current questions.';refresh();return;}
     if (Object.hasOwn(session.answers, problem.id)) return;
     const draft = drafts[problem.id] || '';
     if (!draft.trim()) {
@@ -186,7 +244,8 @@ export function createInterview({
       if (session?.id !== request.sessionId) return;
       if (!checked || typeof checked.pass !== 'boolean') throw new Error('The answer checker returned an incomplete result. Please try again.');
       const receivedAt = now();
-      session = recordInterviewAnswer(session, {problemId: problem.id, pass: checked.pass, startedAt: request.startedAt, receivedAt}, receivedAt);
+      session = recordInterviewAnswer(session, {problemId: problem.id, pass: checked.pass, startedAt: request.startedAt, receivedAt, submissionId:checked.attempt?.submissionId, assistance:checked.attempt?.assistance, score:checked.score}, receivedAt);
+      persist();
     } catch (error) {
       if (session?.id !== request.sessionId) return;
       const message = error instanceof Error ? error.message : 'The answer could not be checked. Please try again.';
@@ -203,14 +262,21 @@ export function createInterview({
 
   function onInput(event) {
     const field = event.target;
+    if (!editable()) return Boolean(field.matches('[data-interview-answer],[data-interview-note]'));
     if (field.matches('[data-interview-answer]')) {
       if (!hasActive() || pending || Number(field.dataset.interviewAnswer) !== currentProblem()?.id || Object.hasOwn(session.answers, currentProblem().id)) return true;
-      if (field.type !== 'radio' || field.checked) drafts[currentProblem().id] = field.value.slice(0, 2500);
+      if (field.dataset.interviewPart) {
+        let parts={};try{const parsed=JSON.parse(drafts[currentProblem().id]||'{}');if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))parts=parsed;}catch{}
+        if (currentProblem().parts?.some(part=>part.id===field.dataset.interviewPart)) parts={...parts,[field.dataset.interviewPart]:field.value.slice(0,150)};
+        drafts[currentProblem().id]=JSON.stringify(parts);
+      } else if (field.type !== 'radio' || field.checked) drafts[currentProblem().id] = field.value.slice(0, 2500);
+      persist();
       delete errors[currentProblem().id];
       return true;
     }
     if (field.matches('[data-interview-note]')) {
       if (hasActive() && Number(field.dataset.interviewNote) === currentProblem()?.id) notes[currentProblem().id] = field.value.slice(0, 10000);
+      persist();
       return true;
     }
     return false;
@@ -236,15 +302,26 @@ export function createInterview({
   }
 
   function onClick(event) {
-    const button = event.target.closest('[data-interview-action],[data-interview-preset],[data-interview-question],[data-interview-review]');
+    const button = event.target.closest('[data-interview-action],[data-interview-preset],[data-interview-question],[data-interview-review],[data-interview-history]');
     if (!button) return false;
     if (button.disabled) return true;
+    if (button.dataset.interviewAction==='retry-save') { void storage?.retry().then(()=>{if(!hydrated)restore();refresh();}); return true; }
+    if (button.dataset.interviewAction==='load-saved') {
+      if (pending) {toast('Wait for your current answer to finish checking.');return true;}
+      storage?.useRemote();restore();refresh();return true;
+    }
+    if (!editable()) return true;
+    if (button.dataset.interviewHistory && !hasActive() && !pending) {
+      const item=history.find(item=>item.session.id===button.dataset.interviewHistory);
+      if (item) {archiveCurrent();history=history.filter(entry=>entry.session.id!==item.session.id);session=item.session;questionIndex=item.questionIndex;drafts=item.drafts;notes=item.notes;finishNotice=item.finishNotice||'';persist();render();}
+      return true;
+    }
     if (button.dataset.interviewPreset && !session) {
       const preset = presets[button.dataset.interviewPreset];
       if (preset) { config.topics = [...preset.topics]; render(); document.querySelector(`[data-interview-preset="${button.dataset.interviewPreset}"]`)?.focus({preventScroll: true}); }
     } else if (button.dataset.interviewQuestion !== undefined && hasActive()) {
       const index = Number(button.dataset.interviewQuestion);
-      if (Number.isInteger(index) && index >= 0 && index < session.problems.length) { questionIndex = index; confirmingFinish = false; render(); document.querySelector('#interview-question-title')?.focus({preventScroll: true}); }
+      if (Number.isInteger(index) && index >= 0 && index < session.problems.length) { questionIndex = index; confirmingFinish = false; persist(); render(); document.querySelector('#interview-question-title')?.focus({preventScroll: true}); }
     } else if (button.dataset.interviewReview && session?.endedAt !== null) {
       const id = Number(button.dataset.interviewReview);
       if (session?.problems.some(problem => problem.id === id) && pending?.problemId !== id) openProblem(id);
@@ -252,7 +329,7 @@ export function createInterview({
     else if (button.dataset.interviewAction === 'finish' && hasActive()) { confirmingFinish = true; render(); document.querySelector('[data-interview-action="keep-going"]')?.focus({preventScroll: true}); }
     else if (button.dataset.interviewAction === 'keep-going') { confirmingFinish = false; render(); }
     else if (button.dataset.interviewAction === 'confirm-finish') finish();
-    else if (button.dataset.interviewAction === 'new' && !hasActive() && !pending) { discard(); render(); }
+    else if (button.dataset.interviewAction === 'new' && !hasActive() && !pending) { archiveCurrent(); discard(); persist(); render(); }
     return true;
   }
 
@@ -269,7 +346,9 @@ export function createInterview({
       navigate('interview');
       return;
     }
+    archiveCurrent();
     discard();
+    persist();
     config.topics = interviewTopics.includes(category) ? [category] : [...interviewTopics];
     navigate('interview');
   }
@@ -278,5 +357,5 @@ export function createInterview({
     return `<section class="interview-summary-card"><span class="interview-summary-icon" aria-hidden="true">${icon('clock', 22)}</span><div><span class="eyebrow">MOCK INTERVIEW</span><h2>${hasActive() ? 'Your timer is still running.' : session ? 'Make room for a little pressure.' : 'Ready to put it together?'}</h2><p>${hasActive() ? 'Return to your questions. Your drafts are right where you left them.' : 'Choose your topics, set a timer, and see where your reasoning takes you.'}</p></div><button class="button" data-view="interview">${hasActive() ? 'Resume interview' : session ? 'View your results' : 'Build an interview'}${icon('chevron', 15)}</button></section>`;
   }
 
-  return {render, onClick, onInput, onChange, onSubmit, startFocused, hasActive, hasPending, discard, summaryCard};
+  return {render, onClick, onInput, onChange, onSubmit, startFocused, hasActive, hasPending, discard, summaryCard, restore, updateSyncStatus};
 }

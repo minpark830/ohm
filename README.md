@@ -16,4 +16,4 @@ Browser sign-in storage shares the minpark830.github.io origin with other projec
 
 GitHub Pages publishes the main branch, root folder. The files are generated from Ohm's maintained source with npm run build:pages. To update this interface, upload the generated files from .local/pages-release after testing. Public problem edits appear through the API without republishing this repository.
 
-The simulations are educational circuit models; the HDL checker supports limited one-bit combinational expressions, not a full Verilog simulator.
+The simulations are educational circuit models. Library HDL checks one-bit combinational expressions; the separate clocked workbench supports a bounded synchronous subset with testbenches and waveforms. Neither is a full Verilog compiler. The learning center includes references and fresh-value drills; saved mock interviews resume after reload.

@@ -9,11 +9,14 @@ export function hostedUrl(route='account'){
 function routeKind(path,method='GET'){
   if(typeof path!=='string')return null;
   const verb=String(method).toUpperCase();
+  if(verb==='GET'&&/^\/api\/variations\?kind=(divider|rc|opamp|filter|buck|adc)&seed=\d{1,10}$/.test(path)||verb==='POST'&&path==='/api/variations/check')return 'public';
+  if(verb==='GET'&&/^\/api\/account\/export(?:\?table=(learner_accounts|auth_identities|learner_state|learner_solved|learner_attempts|learner_imports|learner_interviews|learner_assistance)&after=\d+)?$/.test(path))return 'account';
+  if(path==='/api/account/interviews'&&['GET','PUT'].includes(verb))return 'account';
   if(verb==='GET'&&(path==='/api/problems'||/^\/api\/problems\/[1-9]\d*\/(hints|solution)(\?version=[1-9]\d*)?$/.test(path))||verb==='POST'&&/^\/api\/problems\/[1-9]\d*\/check$/.test(path))return 'public';
   const accountRoutes={
     '/api/auth/config':'GET','/api/session':'GET','/api/auth/finish':'POST',
     '/api/account/progress':'GET','/api/account/state':'PUT',
-    '/api/account/submit':'POST','/api/account/import':'POST'
+    '/api/account/submit':'POST','/api/account/import':'POST','/api/account/assistance':'POST','/api/account/delete':'POST'
   };
   return Object.hasOwn(accountRoutes,path)&&accountRoutes[path]===verb?'account':null;
 }
