@@ -10,7 +10,8 @@ function routeKind(path,method='GET'){
   if(typeof path!=='string')return null;
   const verb=String(method).toUpperCase();
   if(verb==='GET'&&/^\/api\/variations\?kind=(divider|rc|opamp|filter|buck|adc)&seed=\d{1,10}$/.test(path)||verb==='POST'&&path==='/api/variations/check')return 'public';
-  if(verb==='GET'&&/^\/api\/account\/export(?:\?table=(learner_accounts|auth_identities|learner_state|learner_solved|learner_attempts|learner_imports|learner_interviews|learner_assistance)&after=\d+)?$/.test(path))return 'account';
+  if(verb==='GET'&&/^\/api\/account\/export(?:\?table=(learner_accounts|auth_identities|learner_state|learner_solved|learner_attempts|learner_imports|learner_interviews|learner_assistance|learner_labs)&after=\d+)?$/.test(path))return 'account';
+  if(/^\/api\/account\/labs\/(debugging|design)$/.test(path)&&['GET','PUT'].includes(verb))return 'account';
   if(path==='/api/account/interviews'&&['GET','PUT'].includes(verb))return 'account';
   if(verb==='GET'&&(path==='/api/problems'||/^\/api\/problems\/[1-9]\d*\/(hints|solution)(\?version=[1-9]\d*)?$/.test(path))||verb==='POST'&&/^\/api\/problems\/[1-9]\d*\/check$/.test(path))return 'public';
   const accountRoutes={
