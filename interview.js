@@ -1,7 +1,8 @@
+import {roleTrackById,resolveRoleTrack} from './role-track-data.js?v=ce033701414479af';
 import {
   interviewTopics, selectInterviewProblems, createInterviewSession,
   remainingMs, recordInterviewAnswer, finishInterview, sessionScore
-} from './interview-model.js?v=92e728f30bc7fefd';
+} from './interview-model.js?v=ce033701414479af';
 
 const presets = {
   mixed: {label: 'Mixed interview', note: 'A little of everything', topics: [...interviewTopics]},
@@ -19,6 +20,7 @@ export function createInterview({
   schedule = (callback, milliseconds) => setInterval(callback, milliseconds), cancel = id => clearInterval(id)
 }) {
   let config = {topics: [...interviewTopics], difficulty: 'All levels', count: 5, minutes: 20, preferUnsolved: true};
+  let roleId = null;
   let session = null;
   let questionIndex = 0;
   let drafts = {};
@@ -36,7 +38,8 @@ export function createInterview({
   const currentProblem = () => session?.problems[questionIndex];
   const badge = problem => `<span class="difficulty ${['Easy', 'Medium', 'Hard'].includes(problem.difficulty) ? problem.difficulty : ''}"><i class="difficulty-dot"></i>${esc(problem.difficulty)}</span>`;
   const refresh = () => { if (isActive()) render(); };
-  const matchingProblems = () => getProblems().filter(problem =>
+  const availablePool = () => roleId ? resolveRoleTrack(roleId,getProblems(),getProgress()).problems : getProblems();
+  const matchingProblems = () => availablePool().filter(problem =>
     problem.published !== false && problem.published !== 0 && config.topics.includes(problem.category) &&
     (config.difficulty === 'All levels' || problem.difficulty === config.difficulty));
 
@@ -132,12 +135,12 @@ export function createInterview({
     const solved = new Set(getProgress().solved || []);
     const fresh = pool.filter(problem => !solved.has(problem.id)).length;
     const count = Math.min(config.count, pool.length);
-    const selectedPreset = presetName();
+    const selectedPreset = roleId ? null : presetName();
     shell(`<div class="page interview-page">
       <div class="page-heading interview-heading"><div><span class="eyebrow">PRACTICE UNDER PRESSURE</span><h1>Think clearly. Beat the clock.</h1><p>A focused mock interview, built around the topics you want to practice.</p></div><span class="interview-heading-mark" aria-hidden="true">${icon('clock', 26)}</span></div>
       <div class="interview-setup-layout"><section class="interview-card interview-setup" aria-labelledby="interview-setup-title">
         <div class="interview-section-heading"><span class="interview-step">01</span><div><h2 id="interview-setup-title">Build your interview</h2><p>Choose a focus, then make it yours.</p></div></div>
-        <div class="interview-presets" role="group" aria-label="Interview focus">${Object.entries(presets).map(([key, preset]) => `<button type="button" data-interview-preset="${key}" aria-pressed="${selectedPreset === key}"><strong>${preset.label}</strong><span>${preset.note}</span></button>`).join('')}</div>
+        ${roleId?`<div class="interview-role-focus"><div><strong>${esc(roleTrackById(roleId).title)} track</strong><span>Questions come only from this track’s currently available problem set.</span></div><button class="button" data-interview-action="clear-track">Use all topics</button></div>`:''}<div class="interview-presets" role="group" aria-label="Interview focus">${Object.entries(presets).map(([key, preset]) => `<button type="button" data-interview-preset="${key}" aria-pressed="${selectedPreset === key}"><strong>${preset.label}</strong><span>${preset.note}</span></button>`).join('')}</div>
         <fieldset class="interview-fieldset"><legend>Topics to include</legend><div class="interview-topics">${interviewTopics.map((topic, index) => `<label><input type="checkbox" data-interview-topic="${index}" ${config.topics.includes(topic) ? 'checked' : ''}><span>${esc(topic)}</span></label>`).join('')}</div></fieldset>
         <div class="interview-config-grid"><label>Difficulty<select class="select" data-interview-config="difficulty">${['All levels', 'Easy', 'Medium', 'Hard'].map(level => `<option ${config.difficulty === level ? 'selected' : ''}>${level}</option>`).join('')}</select></label><label>Questions<select class="select" data-interview-config="count">${[3, 5, 8].map(count => `<option value="${count}" ${config.count === count ? 'selected' : ''}>${count} questions</option>`).join('')}</select></label><label>Time limit<select class="select" data-interview-config="minutes">${[10, 20, 30].map(minutes => `<option value="${minutes}" ${config.minutes === minutes ? 'selected' : ''}>${minutes} minutes</option>`).join('')}</select></label></div>
         <label class="interview-prefer"><input type="checkbox" data-interview-config="preferUnsolved" ${config.preferUnsolved ? 'checked' : ''}><span><strong>Prioritize unsolved problems</strong><small>Use solved problems when more questions are needed.</small></span></label>
@@ -206,7 +209,7 @@ export function createInterview({
 
   function start() {
     if (hasActive() || pending || !editable()) return;
-    const selected = selectInterviewProblems(getProblems(), getProgress(), config);
+    const selected = selectInterviewProblems(availablePool(), getProgress(), config);
     if (!selected.length) { toast('Choose a topic and difficulty with available problems.'); return; }
     archiveCurrent();
     discard();
@@ -311,6 +314,7 @@ export function createInterview({
       storage?.useRemote();restore();refresh();return true;
     }
     if (!editable()) return true;
+    if (button.dataset.interviewAction==='clear-track' && !session) {roleId=null;render();return true;}
     if (button.dataset.interviewHistory && !hasActive() && !pending) {
       const item=history.find(item=>item.session.id===button.dataset.interviewHistory);
       if (item) {archiveCurrent();history=history.filter(entry=>entry.session.id!==item.session.id);session=item.session;questionIndex=item.questionIndex;drafts=item.drafts;notes=item.notes;finishNotice=item.finishNotice||'';persist();render();}
@@ -318,7 +322,7 @@ export function createInterview({
     }
     if (button.dataset.interviewPreset && !session) {
       const preset = presets[button.dataset.interviewPreset];
-      if (preset) { config.topics = [...preset.topics]; render(); document.querySelector(`[data-interview-preset="${button.dataset.interviewPreset}"]`)?.focus({preventScroll: true}); }
+      if (preset) { roleId=null; config.topics = [...preset.topics]; render(); document.querySelector(`[data-interview-preset="${button.dataset.interviewPreset}"]`)?.focus({preventScroll: true}); }
     } else if (button.dataset.interviewQuestion !== undefined && hasActive()) {
       const index = Number(button.dataset.interviewQuestion);
       if (Number.isInteger(index) && index >= 0 && index < session.problems.length) { questionIndex = index; confirmingFinish = false; persist(); render(); document.querySelector('#interview-question-title')?.focus({preventScroll: true}); }
@@ -349,7 +353,18 @@ export function createInterview({
     archiveCurrent();
     discard();
     persist();
+    roleId=null;
     config.topics = interviewTopics.includes(category) ? [category] : [...interviewTopics];
+    navigate('interview');
+  }
+
+  function startTrack(id) {
+    if (!roleTrackById(id)) return;
+    if (!editable() || hasPending()) { toast('Save or resolve your current interview before preparing another.'); navigate('interview'); return; }
+    if (hasActive()) { toast('Your interview is still in progress. Finish it before starting another.'); navigate('interview'); return; }
+    archiveCurrent(); discard(); persist();
+    roleId=id;
+    config={topics:[...new Set(resolveRoleTrack(id,getProblems()).problems.map(p=>p.category))],difficulty:'All levels',count:5,minutes:20,preferUnsolved:true};
     navigate('interview');
   }
 
@@ -357,5 +372,5 @@ export function createInterview({
     return `<section class="interview-summary-card"><span class="interview-summary-icon" aria-hidden="true">${icon('clock', 22)}</span><div><span class="eyebrow">MOCK INTERVIEW</span><h2>${hasActive() ? 'Your timer is still running.' : session ? 'Make room for a little pressure.' : 'Ready to put it together?'}</h2><p>${hasActive() ? 'Return to your questions. Your drafts are right where you left them.' : 'Choose your topics, set a timer, and see where your reasoning takes you.'}</p></div><button class="button" data-view="interview">${hasActive() ? 'Resume interview' : session ? 'View your results' : 'Build an interview'}${icon('chevron', 15)}</button></section>`;
   }
 
-  return {render, onClick, onInput, onChange, onSubmit, startFocused, hasActive, hasPending, discard, summaryCard, restore, updateSyncStatus};
+  return {render, onClick, onInput, onChange, onSubmit, startFocused, startTrack, hasActive, hasPending, discard, summaryCard, restore, updateSyncStatus};
 }

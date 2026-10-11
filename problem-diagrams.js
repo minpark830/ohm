@@ -1,5 +1,5 @@
-import {problemDiagramAssets} from './problem-diagram-assets.js?v=92e728f30bc7fefd';
-import {expandedProblemDiagramAssets} from './expanded-problem-diagrams.js?v=92e728f30bc7fefd';
+import {problemDiagramAssets} from './problem-diagram-assets.js?v=ce033701414479af';
+import {expandedProblemDiagramAssets} from './expanded-problem-diagrams.js?v=ce033701414479af';
 const originalSlugs=['one-loop-two-resistors','balance-the-node','loaded-voltage-divider','floating-source-supernode','rc-time-constant','charging-after-one-tau','discharge-to-quarter-voltage','loaded-rc-transient','bjt-current-gain','bjt-switch-current-limit','emitter-resistor-bias','bjt-transconductance','identify-nmos-region','nmos-saturation-current','nmos-triode-current','nmos-source-self-bias','boolean-absorption','full-adder-output','signed-addition-overflow','setup-time-budget','write-a-two-input-xor','write-a-two-to-one-mux','nonblocking-pipeline-step','repair-combinational-sensitivity'];
 // Expansion IDs depend on the database's insertion history; match immutable slugs.
 const diagrams=new Map([...problemDiagramAssets.map(diagram=>[originalSlugs[diagram.id-1],diagram]),...expandedProblemDiagramAssets.map(diagram=>[diagram.slug,diagram])]);

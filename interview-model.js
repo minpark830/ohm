@@ -60,7 +60,7 @@ export function selectInterviewProblems(problems, progress = {}, config = {}, ra
 export function createInterviewSession(problems, config = {}, now = Date.now()) {
   if (!timestamp(now)) throw new RangeError('Use a valid interview start time.');
   const questions = available(problems).map(problem => {
-    const {answer, hints, explanation, formula, hdlOutputs, ...visible} = problem;
+    const {answer, hints, explanation, formula, hdlOutputs, referenceCode, walkthrough, ...visible} = problem;
     const copy=structuredClone(visible);
     if(Array.isArray(copy.parts))copy.parts=copy.parts.map(({id,label,unit})=>({id,label,unit}));
     return copy;

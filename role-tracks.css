@@ -1,0 +1,64 @@
+.role-tracks-page { max-width: 1320px; }
+.role-track-picker { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-bottom: 24px; }
+.role-track-picker button { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; text-align: left; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); min-width: 0; }
+.role-track-picker button[aria-current=page] { border-color: var(--green); background: var(--mint); }
+.role-track-picker strong { font-size: 13px; color: var(--text); }
+.role-track-picker button > span:last-child { font-size: 11px; color: var(--muted); }
+.role-track-icon { display: inline-flex; color: var(--green); margin-bottom: 5px; }
+.role-track-hero { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 40px; border: 1px solid var(--line); border-radius: 15px; padding: 30px; background: var(--paper); }
+.role-track-hero .eyebrow { color: var(--green); }
+.role-track-hero h2 { font-size: 28px; letter-spacing: -.7px; margin: 10px 0; }
+.role-track-hero p { color: var(--muted); font-size: 13px; line-height: 1.8; }
+.role-track-coverage { display: flex; gap: 7px; flex-wrap: wrap; margin: 18px 0; }
+.role-track-coverage span { background: var(--mint); color: var(--green); font-size: 11px; padding: 5px 9px; border-radius: 5px; }
+.role-track-prerequisite strong { display: block; color: var(--text); font-weight: 500; }
+.role-track-actions { display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+.role-track-count { display: flex; flex-direction: column; gap: 2px; }
+.role-track-count strong { font-size: 30px; letter-spacing: -.8px; }
+.role-track-count strong span { color: var(--muted); font-size: 19px; font-weight: 400; }
+.role-track-count > span, .role-track-actions small { color: var(--muted); font-size: 11px; line-height: 1.6; }
+.role-track-actions .button { justify-content: center; }
+.role-track-progress { height: 5px; background: var(--line); border-radius: 5px; overflow: hidden; margin: 3px 0 10px; }
+.role-track-progress span { display: block; height: 100%; background: var(--green); }
+.role-track-availability { color: var(--muted); font-size: 12px; margin: 15px 0; }
+.role-track-stages { display: grid; gap: 16px; margin-top: 24px; }
+.role-stage { border: 1px solid var(--line); border-radius: 12px; background: var(--paper); padding: 24px; }
+.role-stage-heading { display: flex; align-items: center; gap: 14px; }
+.role-stage-heading h3 { font-size: 17px; margin-top: 4px; }
+.role-stage-number { display: grid; place-items: center; flex-shrink: 0; width: 39px; height: 39px; border-radius: 10px; background: var(--mint); color: var(--green); font: 12px var(--mono); }
+.role-stage-count { font: 12px var(--mono); color: var(--muted); margin-left: auto; white-space: nowrap; }
+.role-stage-milestone { color: var(--muted); font-size: 12px; line-height: 1.8; margin: 16px 0 8px; }
+.role-stage-milestone strong { color: var(--text); font-weight: 500; margin-right: 7px; }
+.role-stage-problems { list-style: none; margin: 0; padding: 0; }
+.role-stage-problems li { display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--line); padding: 14px 0; }
+.role-stage-problems li:last-child { padding-bottom: 0; }
+.role-stage-problems button { text-align: left; color: var(--text); font-size: 13px; line-height: 1.6; }
+.role-stage-problems button:hover { color: var(--green); }
+.role-problem-state { display: grid; place-items: center; flex-shrink: 0; height: 18px; width: 18px; border: 1px solid var(--line); border-radius: 50%; }
+.role-problem-state.is-solved { background: var(--mint); border-color: var(--mint); color: var(--green); }
+.role-problem-meta { margin-left: auto; flex-shrink: 0; font-size: 11px; color: var(--muted); }
+.role-track-resources { display: flex; justify-content: space-between; gap: 24px; align-items: center; padding: 25px 0; }
+.role-track-resources h2 { font-size: 17px; }
+.role-track-resources p { font-size: 12px; color: var(--muted); margin-top: 7px; }
+.role-track-resources > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; }
+.role-track-note { color: var(--muted); font-size: 11px; line-height: 1.8; max-width: 900px; }
+.interview-role-focus { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--green); background: var(--mint); border-radius: 9px; margin-bottom: 18px; }
+.interview-role-focus strong, .interview-role-focus span { display: block; }
+.interview-role-focus strong { color: var(--green); font-size: 13px; }
+.interview-role-focus span { color: var(--muted); font-size: 11px; line-height: 1.6; margin-top: 4px; }
+@media (max-width: 1000px) {
+  .role-track-picker { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .role-track-hero { grid-template-columns: minmax(0, 1fr) 240px; gap: 24px; padding: 24px; }
+  .role-track-resources { align-items: flex-start; flex-direction: column; }
+}
+@media (max-width: 650px) {
+  .role-track-picker { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .role-track-picker button { padding: 14px; }
+  .role-track-hero { grid-template-columns: minmax(0, 1fr); padding: 21px; gap: 24px; }
+  .role-stage { padding: 18px; }
+  .role-stage-problems li { flex-wrap: wrap; gap: 8px 10px; }
+  .role-stage-problems button { flex: 1; }
+  .role-problem-meta { width: 100%; margin-left: 28px; }
+  .role-track-resources > div:last-child { flex-direction: column; align-items: stretch; width: 100%; }
+  .interview-role-focus { align-items: flex-start; flex-direction: column; }
+}
