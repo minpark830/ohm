@@ -1,4 +1,4 @@
-import {debuggingScenarios,debugScenario,diagnoseDebugCase,measureDebugCase} from './debugging-model.js?v=f598bd1f7fbf5697';
+import {debuggingScenarios,debugScenario,diagnoseDebugCase,measureDebugCase} from './debugging-model.js?v=6a634941589c3c0e';
 
 // Store model identifiers and evidence only. Displayed readings and verdicts are
 // always recalculated; saved practice is not an assessment credential.

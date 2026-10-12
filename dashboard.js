@@ -1,0 +1,46 @@
+import {dashboardSnapshot} from './dashboard-model.js?v=6a634941589c3c0e';
+
+export function createDashboard({shell, esc, icon, getProblems, getProgress, getSession, getInterviewState, getDebugState, getDesignState, navigate, openProblem, isActive = () => true}) {
+  const read = getter => { try { return getter?.(); } catch { return undefined; } };
+  const snapshot = () => dashboardSnapshot({problems:read(getProblems), progress:read(getProgress), interviewState:read(getInterviewState), debugState:read(getDebugState), designState:read(getDesignState)});
+  const action = (view, label, primary = false) => `<button class="button ${primary?'primary':''}" data-dashboard-view="${view}">${esc(label)}${icon('chevron',15)}</button>`;
+  const problemAction = (problem, label, primary = false) => `<button class="button ${primary?'primary':''}" data-dashboard-problem="${problem.id}">${esc(label)}${icon('chevron',15)}</button>`;
+  function render() {
+    const state = snapshot(), account = read(getSession);
+    const interview = state.interview;
+    let lead = action('roadmap','Start Ohm 75',true), leadNote = 'A guided path through the fundamentals is a good place to begin.';
+    if (interview?.active) { lead = action('interview',interview.expired?'View interview results':'Resume interview',true); leadNote = interview.expired?'Your interview time has ended. Open it to review your work.':'Your interview is waiting. Its timer keeps running while you are away.'; }
+    else if (state.resume.length) { lead = problemAction(state.resume[0],'Resume a problem',true); leadNote = 'Pick up your saved reasoning, then take the next step.'; }
+    else if (state.debugging) { lead = action('debug','Return to debugging',true); leadNote = 'Your circuit measurements are ready when you are.'; }
+    else if (state.designing) { lead = action('design','Open your design studio',true); leadNote = 'Keep refining a component choice or revisit a checked design.'; }
+    else if (state.solvedCount) { lead = action('review','Open review queue',true); leadNote = 'Revisit a concept you have practiced, or choose a fresh problem.'; }
+    const workspace = account?.signedIn === true ? 'YOUR ACCOUNT WORKSPACE' : account?.signedIn === false ? 'YOUR BROWSER WORKSPACE' : 'YOUR LEARNING WORKSPACE';
+    const metric = (symbol, count, denominator, label, note) => `<div class="dashboard-metric"><span class="dashboard-metric-icon">${icon(symbol,19)}</span><div><strong>${count}${denominator ? `<span> / ${denominator}</span>`:''}</strong><p>${label}</p><small>${note}</small></div></div>`;
+    const resumeMarkup = state.resume.length ? `<ul class="dashboard-resume-list">${state.resume.map(problem=>`<li><span class="dashboard-question-number">${String(problem.id).padStart(2,'0')}</span><div><h3>${esc(problem.title)}</h3><p>${esc(problem.category)}${problem.difficulty?` · ${esc(problem.difficulty)}`:''}</p><span class="dashboard-saved-label">${problem.answer&&problem.note?'Saved answer + notes':problem.answer?'Saved answer':'Saved notes'}</span></div>${problemAction(problem,'Continue')}</li>`).join('')}</ul>${state.draftCount>4?`<p class="dashboard-more">Showing 4 of ${state.draftCount} problems with saved work. The rest remain in the problem library.</p>`:''}` : `<div class="dashboard-empty"><span>${icon('book',26)}</span><h3>No unfinished problems here.</h3><p>Start a question and save an answer or a note. You can return to it from this space.</p>${action('problems','Find a problem')}</div>`;
+    const activity = (symbol, label, title, detail, view, button, note = '') => `<article class="dashboard-activity"><span class="dashboard-activity-icon">${icon(symbol,20)}</span><div><span class="eyebrow muted">${label}</span><h3>${esc(title)}</h3><p>${esc(detail)}</p>${note?`<p class="dashboard-caveat">${esc(note)}</p>`:''}${action(view,button)}</div></article>`;
+    const activities = [];
+    if (interview) {
+      const detail = `${interview.submitted} of ${interview.total} questions submitted.`;
+      const notices = [interview.active?'The timer continues while you are away.':'Review this session’s submissions and feedback.'];
+      if (interview.expired) notices.unshift('This interview has reached its time limit.');
+      if (interview.unavailable) notices.push(`${interview.unavailable} ${interview.unavailable===1?'question is':'questions are'} no longer in the published library.`);
+      if (interview.changed) notices.push('Some questions have changed since this interview began.');
+      activities.push(activity('clock','MOCK INTERVIEW','Your mock interview',detail,'interview',interview.active&&!interview.expired?'Resume interview':'View interview results',notices.join(' ')));
+    }
+    if (state.debugging) activities.push(activity('search','DEBUGGING BENCH',state.debugging.title,`${state.debugging.measurements} saved measurements · ${state.debugging.supported?'last diagnosis supported by the model':state.debugging.diagnosed?'last diagnosis needs more work':'ready to test a diagnosis'}.`,'debug','Open debugging bench'));
+    if (state.designing) activities.push(activity('circuit','DESIGN STUDIO',state.designing.title,`${state.designing.changed} ${state.designing.changed===1?'changed draft':'changed drafts'} · ${state.designing.checked} ${state.designing.checked===1?'saved check':'saved checks'}.`,'design','Open design studio'));
+    shell(`<div class="page dashboard-page"><section class="dashboard-welcome" aria-labelledby="dashboard-title"><div><span class="eyebrow">${workspace}</span><h1 id="dashboard-title">Continue learning.</h1><p>${esc(leadNote)}</p><div class="dashboard-welcome-actions">${lead}${action('problems','Browse problems')}</div></div><div class="dashboard-signal" aria-hidden="true"><svg viewBox="0 0 220 132" fill="none"><path d="M12 66h30l8-16 12 32 12-32 12 32 8-16h38m0-24v48m12-48v48m0-24h64"/><circle cx="12" cy="66" r="4"/><circle cx="208" cy="66" r="4"/><path class="dashboard-signal-curve" d="M20 112c18 0 21-16 38-16s23-47 41-47 24 32 40 32 26-57 57-57"/></svg><span>Make the next connection.</span></div></section><section class="dashboard-metrics" aria-label="Your practice at a glance">${metric('check',state.solvedCount,state.total,'Library solves','Published problems only')}${metric('search',state.evidenceCount,0,'Supported debugging cases','Evidence checked by the model')}${metric('circuit',state.validatedDesigns,state.designTotal,'Designs validated','Nominal exercise specifications')}</section><div class="dashboard-content"><section class="dashboard-card dashboard-saved" aria-labelledby="dashboard-saved-title"><div class="dashboard-section-heading"><div><span class="eyebrow muted">PICK UP A THREAD</span><h2 id="dashboard-saved-title">Your unfinished problems</h2></div>${state.draftCount?`<span class="pill-count">${state.draftCount}</span>`:''}</div>${resumeMarkup}${state.unavailable?`<p class="dashboard-unavailable">${state.unavailable} ${state.unavailable===1?'saved problem is':'saved problems are'} unavailable in the current published library. Your saved work has not been removed.</p>`:''}</section><section class="dashboard-card dashboard-workspaces" aria-labelledby="dashboard-workspaces-title"><div class="dashboard-section-heading"><div><span class="eyebrow muted">MORE WAYS TO PRACTICE</span><h2 id="dashboard-workspaces-title">Your practice spaces</h2></div></div>${activities.length?activities.join(''):`<div class="dashboard-empty dashboard-space-empty"><span>${icon('circuit',26)}</span><h3>A bench for your next idea.</h3><p>No unfinished interview or lab workspace to resume. Try a circuit design, investigate a fault, or rehearse an interview.</p><div class="dashboard-space-actions">${action('design','Try a design')}${action('debug','Find a circuit fault')}${action('interview','Start an interview')}</div></div>`}</section></div><section class="dashboard-next" aria-label="Choose your next step"><div><span class="eyebrow muted">A LITTLE STRUCTURE HELPS</span><h2>Choose the next connection.</h2><p>Follow the foundations, revisit your review queue, or choose a problem that catches your interest.</p></div><div>${action('roadmap','Explore Ohm 75')}${action('review','Review queue')}</div></section><p class="dashboard-footnote">Problem solves, debugging evidence, and design checks are separate practice records. They do not certify mastery or job readiness.</p></div>`);
+  }
+  function onClick(event) {
+    const button = event.target.closest('[data-dashboard-view],[data-dashboard-problem]');
+    if (!button || !isActive()) return false;
+    if (button.disabled) return true;
+    if (button.dataset.dashboardProblem !== undefined) {
+      const problemId = Number(button.dataset.dashboardProblem);
+      // Re-read the catalog and progress in case either changed after rendering.
+      if (snapshot().resume.some(problem => problem.id === problemId)) openProblem(problemId);
+    } else if (['problems','roadmap','review','interview','debug','design'].includes(button.dataset.dashboardView)) navigate(button.dataset.dashboardView);
+    return true;
+  }
+  return {render,onClick};
+}

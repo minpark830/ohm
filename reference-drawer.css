@@ -1,0 +1,21 @@
+.reference-open{font-size:12px;padding:8px 11px;color:var(--green-dark)}
+.reference-drawer{position:fixed;inset:0 0 0 auto;margin:0;width:min(500px,100vw);max-width:100vw;height:100vh;height:100dvh;max-height:none;padding:0;border:0;border-left:1px solid var(--line);background:var(--paper);color:var(--text);box-shadow:-12px 0 55px #142d1d20;overflow:hidden}
+.reference-drawer[open]{display:flex;flex-direction:column}
+.reference-drawer::backdrop{background:#0d191570}
+.reference-header{display:flex;align-items:start;gap:18px;padding:27px 28px 23px;border-bottom:1px solid var(--line);flex-shrink:0;background:var(--paper)}
+.reference-header>div{flex:1;min-width:0}.reference-header .eyebrow{font-size:10px;color:var(--green)}
+.reference-header h2{font-size:23px;line-height:1.4;margin:9px 0 7px;max-width:310px}
+.reference-header p{font-size:12px;color:var(--muted);line-height:1.75;max-width:330px}
+.reference-close{flex-shrink:0;margin:-3px -6px 0 0;width:40px;height:40px}
+.reference-body{overflow-y:auto;overscroll-behavior:contain;min-height:0;flex:1;padding:24px 28px 32px;scrollbar-gutter:stable}
+.reference-context{margin-bottom:23px}.reference-context .eyebrow{color:var(--green);font-size:10px}.reference-context p{margin-top:5px;font-size:12px;color:var(--muted);overflow-wrap:anywhere;line-height:1.7}
+.reference-section h3{font-size:17px;line-height:1.5;margin-bottom:14px}.reference-formula{border:1px solid var(--line);background:var(--mint);color:var(--green-dark);padding:16px;font:12px/1.9 var(--mono);border-radius:8px;white-space:pre-wrap;overflow-wrap:anywhere}
+.reference-method{padding-left:20px;margin:20px 0;display:grid;gap:13px;font-size:13px;line-height:1.8;color:var(--muted)}.reference-method li{padding-left:4px}.reference-method li::marker{color:var(--green);font-weight:600}
+.reference-caution{padding:15px 16px;background:var(--bg);border-radius:8px;font-size:12px;line-height:1.8}.reference-caution strong{font-size:11px;color:var(--text)}.reference-caution p{color:var(--muted);margin-top:4px}
+.reference-source{display:inline-block;margin-top:13px;font-size:11px;color:var(--green-dark);text-decoration:underline;text-underline-offset:3px;line-height:1.7}.reference-new-tab{color:var(--muted);font-size:10px}
+.reference-details{border-top:1px solid var(--line);margin-top:24px;padding-top:18px}.reference-details summary{font-family:var(--display);font-size:14px;font-weight:650;cursor:pointer;color:var(--text);padding:3px 0 7px;list-style-position:outside;margin-left:17px}.reference-details summary::marker{color:var(--green)}.reference-details-body{padding-top:10px;font-size:12px;color:var(--muted);line-height:1.8}.reference-details-body p+p{margin-top:14px}.reference-details-body strong{font-weight:600;color:var(--text)}.reference-details-body ul{padding-left:19px;display:grid;gap:12px;margin:0}.reference-details-body li{padding-left:3px}
+.reference-answer-unit{margin-bottom:10px;overflow-wrap:anywhere}.reference-answer-unit strong{font-family:var(--mono);font-weight:500}
+.reference-prefixes{margin:17px 0 19px;font-size:12px;text-align:left}.reference-prefixes caption{text-align:left;color:var(--muted);font-size:10px;margin-bottom:8px}.reference-prefixes th,.reference-prefixes td{border-bottom:1px solid var(--line);padding:7px 10px 7px 0}.reference-prefixes thead th{font-size:10px;font-weight:500;color:var(--muted)}.reference-prefixes tbody th{font-weight:400}.reference-prefixes td{font-family:var(--mono);color:var(--text)}.reference-prefixes td:last-child{font-size:11px}
+.reference-footer{padding:17px 28px;border-top:1px solid var(--line);background:var(--bg);font-size:10px;color:var(--muted);line-height:1.8;flex-shrink:0}
+.theme-dark .reference-drawer{box-shadow:-12px 0 55px #0005}.theme-dark .reference-drawer::backdrop{background:#020805a8}
+@media(max-width:550px){.reference-drawer{width:100vw;border:0}.reference-header{padding:23px 21px 20px;gap:9px}.reference-header h2{font-size:22px}.reference-body{padding:21px 21px 28px}.reference-footer{padding:15px 21px}.reference-open{font-size:11px;padding:7px 9px}.reference-source{padding:4px 0}}
