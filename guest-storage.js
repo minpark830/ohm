@@ -6,7 +6,7 @@ export function readGuest(storage){
  const state=empty();let cached={};
  const raw=storage.getItem('ohm-progress');try{cached=JSON.parse(raw||'{}')||{};}catch{}
  for(const field of ['solved','bookmarks'])state[field]=[...new Set((Array.isArray(cached[field])?cached[field]:[]).filter(validId).map(Number))];
- state.attempts=(Array.isArray(cached.attempts)?cached.attempts:[]).filter(attempt).map(a=>({id:Number(a.id),pass:a.pass,at:a.at}));
+ state.attempts=(Array.isArray(cached.attempts)?cached.attempts:[]).filter(attempt).map(a=>({id:Number(a.id),pass:a.pass,at:a.at,version:Number.isSafeInteger(a.version)&&a.version>0?a.version:null,assistance:['independent','hint','solution'].includes(a.assistance)?a.assistance:'unknown'}));
  for(const field of ['notes','drafts'])state[field]=Object.fromEntries(Object.entries(cached[field]&&typeof cached[field]==='object'?cached[field]:{}).filter(([id,v])=>validId(id)&&typeof v==='string'));
  // Each field and submission has its own key. A tab never replaces another
  // tab's unrelated work with its older in-memory snapshot.

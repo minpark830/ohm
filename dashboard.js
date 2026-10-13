@@ -1,4 +1,4 @@
-import {dashboardSnapshot} from './dashboard-model.js?v=0f174c989631b5f2';
+import {dashboardSnapshot} from './dashboard-model.js?v=5a6db230efbf0bf2';
 
 export function createDashboard({shell, esc, icon, getProblems, getProgress, getSession, getInterviewState, getDebugState, getDesignState, navigate, openProblem, isActive = () => true}) {
   const read = getter => { try { return getter?.(); } catch { return undefined; } };
@@ -18,7 +18,7 @@ export function createDashboard({shell, esc, icon, getProblems, getProgress, get
     const metric = (symbol, count, denominator, label, note) => `<div class="dashboard-metric"><span class="dashboard-metric-icon">${icon(symbol,19)}</span><div><strong>${count}${denominator ? `<span> / ${denominator}</span>`:''}</strong><p>${label}</p><small>${note}</small></div></div>`;
     const resumeMarkup = state.resume.length ? `<ul class="dashboard-resume-list">${state.resume.map(problem=>`<li><span class="dashboard-question-number">${String(problem.id).padStart(2,'0')}</span><div><h3>${esc(problem.title)}</h3><p>${esc(problem.category)}${problem.difficulty?` · ${esc(problem.difficulty)}`:''}</p><span class="dashboard-saved-label">${problem.answer&&problem.note?'Saved answer + notes':problem.answer?'Saved answer':'Saved notes'}</span></div>${problemAction(problem,'Continue')}</li>`).join('')}</ul>${state.draftCount>4?`<p class="dashboard-more">Showing 4 of ${state.draftCount} problems with saved work. The rest remain in the problem library.</p>`:''}` : `<div class="dashboard-empty"><span>${icon('book',26)}</span><h3>No unfinished problems here.</h3><p>Start a question and save an answer or a note. You can return to it from this space.</p>${action('problems','Find a problem')}</div>`;
     const activity = (symbol, label, title, detail, view, button, note = '') => `<article class="dashboard-activity"><span class="dashboard-activity-icon">${icon(symbol,20)}</span><div><span class="eyebrow muted">${label}</span><h3>${esc(title)}</h3><p>${esc(detail)}</p>${note?`<p class="dashboard-caveat">${esc(note)}</p>`:''}${action(view,button)}</div></article>`;
-    const activities = [];
+    const activities = [activity('book','PERSONAL PRACTICE','Find your next focus','Take a short diagnostic and build a daily plan from your practice history.','plan','Open daily plan'),activity('circuit','ENGINEERING IN CONTEXT','Make a design decision','Work through tolerances, temperature, measurements, and practical tradeoffs.','cases','Try an engineering case'),activity('clock','WEEKLY PRACTICE','A fresh six-topic challenge','Timed practice with private scores and optional public rankings.','challenges','Explore this week')];
     if (interview) {
       const detail = `${interview.submitted} of ${interview.total} questions submitted.`;
       const notices = [interview.active?'The timer continues while you are away.':'Review this session’s submissions and feedback.'];
@@ -39,7 +39,7 @@ export function createDashboard({shell, esc, icon, getProblems, getProgress, get
       const problemId = Number(button.dataset.dashboardProblem);
       // Re-read the catalog and progress in case either changed after rendering.
       if (snapshot().resume.some(problem => problem.id === problemId)) openProblem(problemId);
-    } else if (['problems','roadmap','review','interview','debug','design'].includes(button.dataset.dashboardView)) navigate(button.dataset.dashboardView);
+    } else if (['problems','roadmap','review','interview','debug','design','plan','cases','challenges'].includes(button.dataset.dashboardView)) navigate(button.dataset.dashboardView);
     return true;
   }
   return {render,onClick};

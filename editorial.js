@@ -1,0 +1,19 @@
+import {editorialForProblem} from './editorial-data.js?v=5a6db230efbf0bf2';
+
+export function editorialMarkup(problem,esc,{discussion=true}={}) {
+  const editorial=editorialForProblem(problem);
+  if(!editorial)return `<section class="editorial-note"><p>The worked solution above applies to the current question. An extended editorial has not yet been authored and checked for this version.</p>${discussion?`<button class="button" data-editorial-discuss="${esc(problem.id)}">Ask about this reasoning</button>`:''}</section>`;
+  return `<section class="editorial" data-editorial aria-labelledby="editorial-heading"><div class="editorial-heading"><div><span class="eyebrow muted">GO BEYOND THE RESULT</span><h2 id="editorial-heading">Compare the reasoning.</h2></div><span class="editorial-check-badge">Authored & checked</span></div><p class="editorial-takeaway">${esc(editorial.takeaway)}</p><details class="editorial-section" open><summary>Another way to solve it</summary><div><h3>${esc(editorial.alternative.title)}</h3><ol>${editorial.alternative.steps.map(step=>`<li>${esc(step)}</li>`).join('')}</ol><pre class="formula editorial-equation">${esc(editorial.alternative.equation)}</pre></div></details><details class="editorial-section"><summary>Common wrong turns</summary><div class="editorial-wrong-turns">${editorial.wrongTurns.map(turn=>`<article><h3>${esc(turn.claim)}</h3><p>${esc(turn.why)}</p><p class="editorial-check"><strong>Check:</strong> ${esc(turn.check)}</p></article>`).join('')}</div></details><details class="editorial-section"><summary>From the model to a design</summary><div><h3>${esc(editorial.design.title)}</h3><p>${esc(editorial.design.text)}</p></div></details><details class="editorial-section"><summary>Checks, sources & revision history</summary><div><h3>How this editorial was checked</h3><p>${esc(editorial.check)}</p><p class="editorial-review-note">${esc(editorial.review)}</p><ul class="editorial-sources">${editorial.sources.map(source=>`<li><a href="${esc(source.url)}" target="_blank" rel="noopener noreferrer">${esc(source.title)}<span class="sr-only"> (opens in a new tab)</span></a><p>${esc(source.supports)}</p></li>`).join('')}</ul><dl class="editorial-provenance"><div><dt>Authorship</dt><dd>${esc(editorial.author)}</dd></div><div><dt>Authored / checked</dt><dd><time datetime="${editorial.authoredOn}">${editorial.authoredOn}</time> / <time datetime="${editorial.checkedOn}">${editorial.checkedOn}</time></dd></div><div><dt>Applies to</dt><dd>Problem version ${editorial.version} · editorial revision ${editorial.revision}</dd></div></dl><p class="editorial-revision">${esc(editorial.revisionNote)}</p></div></details><div class="editorial-transfer"><strong>Carry this idea forward</strong><p>${esc(editorial.transfer)}</p></div>${discussion?`<div class="editorial-discussion-link"><p>A different approach or an unresolved question?</p><button class="button" data-editorial-discuss="${esc(problem.id)}">Open problem discussion</button></div>`:''}<p class="editorial-help-note">Reading this editorial is solution help. A later answer with the solution closed is useful practice; viewing an editorial does not mark the problem solved.</p></section>`;
+}
+
+export function createEditorial({esc,getProblem,openDiscussion,discussion}={}) {
+  function markup(problem) {return editorialMarkup(problem,esc,{discussion:typeof openDiscussion==='function'||Boolean(discussion)})+(discussion?.markup?discussion.markup(problem):'');}
+  function onClick(event) {
+    if(discussion?.onClick?.(event))return true;
+    const button=event.target.closest('[data-editorial-discuss]');if(!button)return false;
+    const p=getProblem?.();if(p&&Number(button.dataset.editorialDiscuss)===p.id)openDiscussion?.(p);
+    return true;
+  }
+  function onSubmit(event) {return discussion?.onSubmit?.(event)||false;}
+  return {markup,onClick,onSubmit};
+}

@@ -14,6 +14,11 @@ export const lessons=[
 ];
 export const drillLabels={divider:'Loaded dividers',rc:'RC transients',opamp:'Op-amp gain',filter:'Filter response',buck:'Buck converters',adc:'ADC codes'};
 export function lessonForProblem(problem){
- const words=`${problem.title} ${(problem.tags||[]).join(' ')}`.toLowerCase();
- return [...lessons].map(lesson=>({lesson,score:lesson.tags.filter(tag=>words.includes(tag.toLowerCase())).length})).sort((a,b)=>b.score-a.score).find(x=>x.score>0)?.lesson||lessons.find(l=>l.category===problem.category)||lessons[0];
+ const tokens=value=>String(value||'').toLowerCase().match(/[\p{L}\p{N}]+/gu)||[];
+ const words=tokens(`${problem.title||''} ${(problem.tags||[]).join(' ')}`);
+ const matches=tag=>{const sequence=tokens(tag);return words.some((_,i)=>sequence.every((word,j)=>words[i+j]===word));};
+ // Prefer a relevant device lesson when generic words such as gain or bias
+ // occur, while retaining explicit cross-topic matches (AC, ADC, filters).
+ return [...lessons].map(lesson=>({lesson,score:lesson.tags.filter(matches).length,category:lesson.category===problem.category?1:0}))
+  .sort((a,b)=>b.score-a.score||b.category-a.category).find(x=>x.score>0)?.lesson||lessons.find(l=>l.category===problem.category)||lessons[0];
 }
