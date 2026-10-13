@@ -1,0 +1,25 @@
+name: Ohm public health
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+permissions: {}
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Verify public practice service and browser assets
+        run: |
+          node --input-type=module <<'JS'
+          const site='https://minpark830.github.io/ohm/';
+          const read=async url=>{const r=await fetch(url,{redirect:'error',signal:AbortSignal.timeout(15000),headers:{'Cache-Control':'no-cache',...(url.startsWith('https://ohm-ee-practice.minwoopark2016.chatgpt.site/api/public/')?{Origin:new URL(site).origin}:{})}});if(!r.ok)throw new Error('Endpoint unavailable: '+r.status);return r;};
+          const health=await (await read('https://ohm-ee-practice.minwoopark2016.chatgpt.site/api/public/health')).json();
+          if(health.status!=='ok'||!Number.isInteger(health.publishedProblems)||health.publishedProblems<1)throw new Error('Database health failed');
+          const html=await (await read(site)).text();
+          if(!html.includes('Content-Security-Policy'))throw new Error('Security policy missing');
+          const assets=[...html.matchAll(/(?:src|href)="(\.\/[^"#]+)"/g)].map(m=>new URL(m[1],site));
+          if(!assets.length||assets.some(u=>!u.href.startsWith(site)))throw new Error('Invalid public assets');
+          await Promise.all(assets.map(u=>read(u.href)));
+          console.log('Healthy: '+health.publishedProblems+' questions and '+assets.length+' linked assets');
+          JS
