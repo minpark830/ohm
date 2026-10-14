@@ -17,8 +17,11 @@ export function lessonForProblem(problem){
  const tokens=value=>String(value||'').toLowerCase().match(/[\p{L}\p{N}]+/gu)||[];
  const words=tokens(`${problem.title||''} ${(problem.tags||[]).join(' ')}`);
  const matches=tag=>{const sequence=tokens(tag);return words.some((_,i)=>sequence.every((word,j)=>words[i+j]===word));};
+ const domain=new Map([['BJT','bjt'],['MOSFET','mosfet'],['HDL','logic']]).get(problem.category);
+ if(domain)return lessons.find(l=>l.id===domain);
+ if(problem.category==='Digital logic'&&!['ADC','DAC','quantization'].some(matches))return lessons.find(l=>l.id==='logic');
  // Prefer a relevant device lesson when generic words such as gain or bias
  // occur, while retaining explicit cross-topic matches (AC, ADC, filters).
- return [...lessons].map(lesson=>({lesson,score:lesson.tags.filter(matches).length,category:lesson.category===problem.category?1:0}))
-  .sort((a,b)=>b.score-a.score||b.category-a.category).find(x=>x.score>0)?.lesson||lessons.find(l=>l.category===problem.category)||lessons[0];
+ return [...lessons].map(lesson=>({lesson,score:lesson.id==='power'&&!['buck','boost','efficiency'].some(matches)?0:lesson.tags.filter(matches).length,category:lesson.category===problem.category?1:0}))
+  .sort((a,b)=>b.score-a.score||b.category-a.category).find(x=>x.score>0)?.lesson||lessons.find(l=>problem.category==='Digital logic'?l.id==='logic':l.category===problem.category)||lessons[0];
 }

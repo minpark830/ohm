@@ -1,4 +1,4 @@
-import {diagnosticTopics,diagnosticGoals,diagnosticQuestions,emptyDiagnosticState,normalizeDiagnosticState,startDiagnostic,personalizedPlan} from './diagnostic-model.js?v=5a6db230efbf0bf2';
+import {diagnosticTopics,diagnosticGoals,diagnosticQuestions,emptyDiagnosticState,normalizeDiagnosticState,startDiagnostic,personalizedPlan} from './diagnostic-model.js?v=6c6b130bc0f356ca';
 
 const assistanceText=value=>({independent:'No help recorded for this version',hint:'A hint was viewed for this version',solution:'A solution was viewed for this version',unknown:'Help history is unknown'}[value]||'Help history is unknown');
 export function createDiagnostics({shell,esc,icon,getProblems,getProgress,storage,gradeAnswer,openProblem,navigate,isActive=()=>true,toast=()=>{},now=()=>Date.now()}) {

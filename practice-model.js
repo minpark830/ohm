@@ -1,4 +1,4 @@
-import {roadmapStages} from './roadmap-data.js?v=5a6db230efbf0bf2';
+import {roadmapStages} from './roadmap-data.js?v=6c6b130bc0f356ca';
 
 const dayMs = 86400000;
 const intervals = [1, 3, 7, 14, 30];

@@ -1,5 +1,5 @@
-import {createExecutionClient} from './execution-client.js?v=5a6db230efbf0bf2';
-import {emptyFullHDLState,normalizeFullHDLState} from './full-hdl-state.js?v=5a6db230efbf0bf2';
+import {createExecutionClient} from './execution-client.js?v=6c6b130bc0f356ca';
+import {emptyFullHDLState,normalizeFullHDLState} from './full-hdl-state.js?v=6c6b130bc0f356ca';
 const fifoSample=[{rst:1,push:0,pop:0,data_in:0},{rst:0,push:1,pop:0,data_in:17},{rst:0,push:1,pop:0,data_in:34},{rst:0,push:1,pop:0,data_in:51},{rst:0,push:1,pop:0,data_in:68},{rst:0,push:1,pop:0,data_in:85},{rst:0,push:0,pop:1,data_in:0},{rst:0,push:1,pop:1,data_in:102},{rst:0,push:0,pop:1,data_in:0},{rst:0,push:0,pop:1,data_in:0},{rst:0,push:0,pop:1,data_in:0},{rst:0,push:0,pop:1,data_in:0}];
 const pipelineSample=[{rst:1,in_valid:0,in_data:0,out_ready:0},{rst:0,in_valid:1,in_data:42,out_ready:0},{rst:0,in_valid:1,in_data:99,out_ready:0},{rst:0,in_valid:1,in_data:99,out_ready:1},{rst:0,in_valid:0,in_data:0,out_ready:1},{rst:0,in_valid:1,in_data:165,out_ready:1},{rst:0,in_valid:0,in_data:0,out_ready:0},{rst:1,in_valid:1,in_data:255,out_ready:1},{rst:0,in_valid:0,in_data:0,out_ready:1}];
 const arbiterSample=[{rst:1,req:15,accept:0},...Array.from({length:5},()=>({rst:0,req:15,accept:1})),{rst:0,req:10,accept:0},{rst:0,req:10,accept:1},{rst:0,req:0,accept:1},{rst:0,req:4,accept:1},{rst:1,req:12,accept:1},{rst:0,req:15,accept:0}];
