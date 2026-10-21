@@ -1,6 +1,6 @@
 // Supabase owns passwords, PKCE and refresh tokens. Ohm's API independently
 // verifies each access token before resolving a private progress account.
-export async function createAuth({config,createClient,storage,location=window.location,history=window.history,externalFrontend=false,onChange=()=>{}}){
+export async function createAuth({config,createClient,storage,location=window.location,history=window.history,externalFrontend=false,onChange=()=>{},timeoutMs=8000}){
   if(!storage){try{storage=globalThis.localStorage;}catch{}}
   storage ||= {getItem:()=>null,setItem:()=>{throw new Error('Browser storage is unavailable.');},removeItem:()=>{}};
   const providerKey=externalFrontend?'ohm-pages-auth-provider':'ohm-auth-provider';
@@ -11,6 +11,19 @@ export async function createAuth({config,createClient,storage,location=window.lo
   const select=value=>{storage.setItem(providerKey,value);provider=value;};
   const requireStorage=()=>{try{storage.setItem('ohm-auth-probe','1');storage.removeItem('ohm-auth-probe');}catch{throw new Error('Allow browser storage to sign in. You can keep practicing as a guest.');}};
   const callback=kind=>location.origin+basePath+'?auth='+kind+'#account';
+  const connectionError='Your sign-in could not be restored. Check your connection and reload to try again. Your saved account progress is unchanged.';
+  // An SDK refresh can retry or wait for another tab's lock. Bound our wait,
+  // without cancelling refresh-token rotation or deleting a stored session.
+  const bounded=async promise=>{let timer;try{return await Promise.race([promise,new Promise((_resolve,reject)=>{timer=setTimeout(()=>reject(new Error(connectionError)),timeoutMs);})]);}catch{throw new Error(connectionError);}finally{clearTimeout(timer);}};
+  let sessionRead=null;
+  const readSession=()=>{
+    if(!sessionRead){
+      const pending=Promise.resolve().then(()=>client.auth.getSession());
+      sessionRead=pending;
+      pending.then(()=>{if(sessionRead===pending)sessionRead=null;},()=>{if(sessionRead===pending)sessionRead=null;});
+    }
+    return bounded(sessionRead);
+  };
   if(config.enabled){
     client=createClient(config.url,config.publishableKey,{auth:{flowType:'pkce',persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:externalFrontend?'ohm-pages-supabase-auth':'ohm-supabase-auth',storage}});
     client.auth.onAuthStateChange((event,session)=>{
@@ -19,21 +32,22 @@ export async function createAuth({config,createClient,storage,location=window.lo
       if(['SIGNED_IN','SIGNED_OUT','USER_UPDATED','PASSWORD_RECOVERY'].includes(event))setTimeout(()=>onChange({event,subject:session?.user?.id||null}),0);
     });
     const url=new URL(location.href);
+    const isCallback=url.searchParams.has('code')||url.searchParams.has('error')||location.hash.includes('error=');
     try{
       if(url.searchParams.has('code')){
         requireStorage();select('supabase');
-        const result=await client.auth.exchangeCodeForSession(url.searchParams.get('code'));
+        const result=await bounded(client.auth.exchangeCodeForSession(url.searchParams.get('code')));
         if(result.error)throw new Error('This sign-in link expired or was opened in a different browser. Start sign-in again here.');
         recovery=recovery||url.searchParams.get('auth')==='recovery';
         history.replaceState(null,'',recovery?basePath+'?auth=recovery#account':basePath+'#account');
       }else if(url.searchParams.has('error')||location.hash.includes('error=')){
         throw new Error('Sign-in was not completed. Please try again.');
       }
-      const result=await client.auth.getSession();
-      if(result.error)throw result.error;
+      const result=await readSession();
+      if(result.error)throw new Error(connectionError);
       subject=result.data.session?.user?.id||null;
       if(subject){if(!storage.getItem(providerKey))select('supabase');recovery=recovery||url.searchParams.get('auth')==='recovery';}
-    }catch(e){error=e.message;history.replaceState(null,'',basePath+'#account');}
+    }catch(e){error=e.message;if(isCallback)history.replaceState(null,'',basePath+'#account');}
   }
   const requireClient=()=>{if(!client)throw new Error('Account sign-in is not available yet.');requireStorage();return client;};
   const checked=async promise=>{const result=await promise;if(result.error)throw result.error;return result.data;};
@@ -43,8 +57,8 @@ export async function createAuth({config,createClient,storage,location=window.lo
       // Honor changes in another tab without ever silently selecting a fallback.
       try{const current=storage.getItem(providerKey);if(providers.includes(current))provider=current;}catch{}
       if(provider!=='supabase')return {'X-Ohm-Auth-Provider':provider};
-      const result=client?await client.auth.getSession():null;
-      if(result?.error)throw new Error('Sign-in could not be refreshed. Please try again.');
+      const result=client?await readSession():null;
+      if(result?.error)throw new Error(connectionError);
       const token=result?.data?.session?.access_token;
       return {'X-Ohm-Auth-Provider':'supabase',...(token?{'X-Ohm-Access-Token':token}:{})};
     },

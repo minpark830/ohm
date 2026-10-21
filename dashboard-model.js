@@ -1,6 +1,6 @@
-import {emptyDebugState, normalizeDebugState} from './debugging-state.js?v=6c6b130bc0f356ca';
-import {debugScenario, diagnoseDebugCase, measureDebugCase} from './debugging-model.js?v=6c6b130bc0f356ca';
-import {designChallenges, defaultDesignValues, emptyDesignState, normalizeDesignState, designCompletions} from './design-model.js?v=6c6b130bc0f356ca';
+import {emptyDebugState, normalizeDebugState} from './debugging-state.js?v=dc7cdecf1d31ff61';
+import {debugScenario, diagnoseDebugCase, measureDebugCase} from './debugging-model.js?v=dc7cdecf1d31ff61';
+import {designChallenges, defaultDesignValues, emptyDesignState, normalizeDesignState, designCompletions} from './design-model.js?v=dc7cdecf1d31ff61';
 
 const object = value => Boolean(value && typeof value === 'object' && !Array.isArray(value));
 const text = value => typeof value === 'string' && value.trim().length > 0;

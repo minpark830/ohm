@@ -1,4 +1,4 @@
-import {lessonForProblem} from './learning-data.js?v=6c6b130bc0f356ca';
+import {lessonForProblem} from './learning-data.js?v=dc7cdecf1d31ff61';
 
 // These are general references, separate from problem hints and worked solutions.
 // Prefix definitions: https://www.nist.gov/pml/owm/metric-si-prefixes

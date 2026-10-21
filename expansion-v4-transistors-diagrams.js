@@ -1,4 +1,4 @@
-import {draw,diagram} from './diagram-primitives.js?v=6c6b130bc0f356ca';
+import {draw,diagram} from './diagram-primitives.js?v=dc7cdecf1d31ff61';
 
 // The shared primitives put B/G at (x−55,y), C/D at (x+30,y−55),
 // and E/S at (x+30,y+55). The two explicitly named upper-source symbols

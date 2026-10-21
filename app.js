@@ -1,44 +1,44 @@
-import {createDashboard} from './dashboard.js?v=6c6b130bc0f356ca';
-import {createDiagnostics} from './diagnostics.js?v=6c6b130bc0f356ca';
-import {emptyDiagnosticState,normalizeDiagnosticState} from './diagnostic-model.js?v=6c6b130bc0f356ca';
-import {createEditorial} from './editorial.js?v=6c6b130bc0f356ca';
-import {createEngineeringCases} from './engineering-cases.js?v=6c6b130bc0f356ca';
-import {emptyCaseState,normalizeCaseState} from './case-model.js?v=6c6b130bc0f356ca';
-import {createCircuitBuilder} from './circuit-builder.js?v=6c6b130bc0f356ca';
-import {emptyCircuitState,normalizeCircuitState} from './circuit-document.js?v=6c6b130bc0f356ca';
-import {createFullHDLWorkbench} from './full-hdl.js?v=6c6b130bc0f356ca';
-import {emptyFullHDLState,normalizeFullHDLState} from './full-hdl-state.js?v=6c6b130bc0f356ca';
-import {createCommunity,createDiscussionModeration} from './community.js?v=6c6b130bc0f356ca';
-import {createChallenges} from './challenges.js?v=6c6b130bc0f356ca';
-import {createReferenceDrawer} from './reference-drawer.js?v=6c6b130bc0f356ca';
-import {defaultLibraryFilters,normalizeLibraryFilters,parseWorkspaceRoute,workspaceHash,filterProblems,problemSelection} from './library-context.js?v=6c6b130bc0f356ca';
-import {createSubmissionFeedback,feedbackPresentation,submissionAccountUnchanged} from './submission-feedback.js?v=6c6b130bc0f356ca';
-import {focusWorkspace,moveTabFocus} from './navigation-a11y.js?v=6c6b130bc0f356ca';
-import {createLabStore} from './lab-storage.js?v=6c6b130bc0f356ca';
-import {emptyDebugState,normalizeDebugState} from './debugging-state.js?v=6c6b130bc0f356ca';
-import {createDesign} from './design.js?v=6c6b130bc0f356ca';
-import {emptyDesignState,normalizeDesignState} from './design-model.js?v=6c6b130bc0f356ca';
-import {createWalkthrough} from './walkthrough.js?v=6c6b130bc0f356ca';
-import {createRoleTracks} from './role-tracks.js?v=6c6b130bc0f356ca';
-import {createDebugging} from './debugging.js?v=6c6b130bc0f356ca';
-import {createInterviewStore} from './interview-storage.js?v=6c6b130bc0f356ca';
-import {createLearning} from './learning.js?v=6c6b130bc0f356ca';
-import {createHDLWorkbench} from './hdl-workbench.js?v=6c6b130bc0f356ca';
-import {helpPage} from './help.js?v=6c6b130bc0f356ca';
-import {HOSTING,requestTarget,requestOptions,usesAccountAuth} from './hosting.js?v=6c6b130bc0f356ca';
-import {createInterview} from './interview.js?v=6c6b130bc0f356ca';
-import {createInsights} from './insights.js?v=6c6b130bc0f356ca';
-import {createPractice} from './practice.js?v=6c6b130bc0f356ca';
-import {utcDate} from './practice-model.js?v=6c6b130bc0f356ca';
-import {createAuth} from './auth.js?v=6c6b130bc0f356ca';
-import {createGuestStore,isGuestStorageKey} from './guest-storage.js?v=6c6b130bc0f356ca';
-import {createAdmin} from './admin.js?v=6c6b130bc0f356ca';
-import {createFeedback} from './feedback.js?v=6c6b130bc0f356ca';
-import {createLearnerStore} from './learner.js?v=6c6b130bc0f356ca';
-import {createAccount} from './account.js?v=6c6b130bc0f356ca';
-import {createSimulations} from './simulations.js?v=6c6b130bc0f356ca';
-import {openDiagramViewer} from './diagram-viewer.js?v=6c6b130bc0f356ca';
-import {diagramForProblem} from './problem-diagrams.js?v=6c6b130bc0f356ca';
+import {createDashboard} from './dashboard.js?v=dc7cdecf1d31ff61';
+import {createDiagnostics} from './diagnostics.js?v=dc7cdecf1d31ff61';
+import {emptyDiagnosticState,normalizeDiagnosticState} from './diagnostic-model.js?v=dc7cdecf1d31ff61';
+import {createEditorial} from './editorial.js?v=dc7cdecf1d31ff61';
+import {createEngineeringCases} from './engineering-cases.js?v=dc7cdecf1d31ff61';
+import {emptyCaseState,normalizeCaseState} from './case-model.js?v=dc7cdecf1d31ff61';
+import {createCircuitBuilder} from './circuit-builder.js?v=dc7cdecf1d31ff61';
+import {emptyCircuitState,normalizeCircuitState} from './circuit-document.js?v=dc7cdecf1d31ff61';
+import {createFullHDLWorkbench} from './full-hdl.js?v=dc7cdecf1d31ff61';
+import {emptyFullHDLState,normalizeFullHDLState} from './full-hdl-state.js?v=dc7cdecf1d31ff61';
+import {createCommunity,createDiscussionModeration} from './community.js?v=dc7cdecf1d31ff61';
+import {createChallenges} from './challenges.js?v=dc7cdecf1d31ff61';
+import {createReferenceDrawer} from './reference-drawer.js?v=dc7cdecf1d31ff61';
+import {defaultLibraryFilters,normalizeLibraryFilters,parseWorkspaceRoute,workspaceHash,filterProblems,problemSelection} from './library-context.js?v=dc7cdecf1d31ff61';
+import {createSubmissionFeedback,feedbackPresentation,submissionAccountUnchanged} from './submission-feedback.js?v=dc7cdecf1d31ff61';
+import {focusWorkspace,moveTabFocus} from './navigation-a11y.js?v=dc7cdecf1d31ff61';
+import {createLabStore} from './lab-storage.js?v=dc7cdecf1d31ff61';
+import {emptyDebugState,normalizeDebugState} from './debugging-state.js?v=dc7cdecf1d31ff61';
+import {createDesign} from './design.js?v=dc7cdecf1d31ff61';
+import {emptyDesignState,normalizeDesignState} from './design-model.js?v=dc7cdecf1d31ff61';
+import {createWalkthrough} from './walkthrough.js?v=dc7cdecf1d31ff61';
+import {createRoleTracks} from './role-tracks.js?v=dc7cdecf1d31ff61';
+import {createDebugging} from './debugging.js?v=dc7cdecf1d31ff61';
+import {createInterviewStore} from './interview-storage.js?v=dc7cdecf1d31ff61';
+import {createLearning} from './learning.js?v=dc7cdecf1d31ff61';
+import {createHDLWorkbench} from './hdl-workbench.js?v=dc7cdecf1d31ff61';
+import {helpPage} from './help.js?v=dc7cdecf1d31ff61';
+import {HOSTING,requestTarget,requestOptions,usesAccountAuth} from './hosting.js?v=dc7cdecf1d31ff61';
+import {createInterview} from './interview.js?v=dc7cdecf1d31ff61';
+import {createInsights} from './insights.js?v=dc7cdecf1d31ff61';
+import {createPractice} from './practice.js?v=dc7cdecf1d31ff61';
+import {utcDate} from './practice-model.js?v=dc7cdecf1d31ff61';
+import {createAuth} from './auth.js?v=dc7cdecf1d31ff61';
+import {createGuestStore,isGuestStorageKey} from './guest-storage.js?v=dc7cdecf1d31ff61';
+import {createAdmin} from './admin.js?v=dc7cdecf1d31ff61';
+import {createFeedback} from './feedback.js?v=dc7cdecf1d31ff61';
+import {createLearnerStore} from './learner.js?v=dc7cdecf1d31ff61';
+import {createAccount} from './account.js?v=dc7cdecf1d31ff61';
+import {createSimulations} from './simulations.js?v=dc7cdecf1d31ff61';
+import {openDiagramViewer} from './diagram-viewer.js?v=dc7cdecf1d31ff61';
+import {diagramForProblem} from './problem-diagrams.js?v=dc7cdecf1d31ff61';
 const app=document.querySelector('#app');
 const submissionFeedback=createSubmissionFeedback();
 // The dedicated owner entrance uses only the server-verified Sites session.
@@ -55,10 +55,11 @@ try{
   loadingStage(ownerMode?'Checking owner access…':'Checking your session…');
   if(!ownerMode){
   const config=await api('/api/auth/config');
-  auth=await createAuth({config,externalFrontend:HOSTING.externalFrontend,createClient:config.enabled?(await import('./supabase-client.js?v=6c6b130bc0f356ca')).createClient:null,onChange:change=>{if(uiReady&&session.provider==='supabase'&&change.subject!==auth.subject){submissionFeedback.reset();learner.invalidateAuth();interviewStore.invalidateAuth();labStores.forEach(store=>store.invalidateAuth());community.discard();challenges.discard();fullHDL.dispose();circuitBuilder.stop();render();}}});
+  auth=await createAuth({config,externalFrontend:HOSTING.externalFrontend,createClient:config.enabled?(await import('./supabase-client.js?v=dc7cdecf1d31ff61')).createClient:null,onChange:change=>{if(uiReady&&session.provider==='supabase'&&change.subject!==auth.subject){submissionFeedback.reset();learner.invalidateAuth();interviewStore.invalidateAuth();labStores.forEach(store=>store.invalidateAuth());community.discard();challenges.discard();fullHDL.dispose();circuitBuilder.stop();render();}}});
+  if(auth.error)throw new Error(auth.error);
   }
   session=await api('/api/session');
-}catch(e){accountError=e.message;if(!HOSTING.externalFrontend)libraryError=e.message;}
+}catch(e){accountError=e.message;}
 loadingStage('Loading your problem library…');
 try{problems=await api('/api/problems');}catch(e){libraryError=e.message;}
 
@@ -164,7 +165,7 @@ const dashboard=createDashboard({shell,esc,icon,getProblems:()=>problems,getProg
 function unavailableWorkspacePage(){
  shell(`<div class="page"><section class="editor-access rail-card"><h1>This page isn’t available.</h1><p class="muted">Return to your practice workspace to keep learning.</p><button class="button primary" data-view="problems">Back to practice</button></section></div>`);
 }
-function render(){if(!activeProblem&&['admin','reports','moderation'].includes(view)){if(!canManage()){unavailableWorkspacePage();return;}if(view==='admin')admin.render();else if(view==='moderation')moderation.render();else feedback.render();return;}if(session.signedIn&&learner.status.authLost)interview.discard();if(libraryError){shell(`<div class="load-error"><h1>The library is taking a moment.</h1><p>${esc(libraryError)}</p><button class="button primary" data-action="reload">Try again</button></div>`);return;}if(view==='account'&&!activeProblem){account.page();return;}if(session.signedIn&&(!learner.status.ready||learner.status.authLost)){shell(`<div class="account-loading"><h1>${learner.status.authLost?'Your sign-in changed.':'Your progress is taking a moment.'}</h1><p>${esc(learner.status.error||'Loading your account progress…')}</p><button class="button primary" data-view="account">Open account</button></div>`);return;}if(view==='reports'&&!activeProblem){feedback.render();return;}if(view==='admin'&&!activeProblem){admin.render();return;}if(!problems.length&&!activeProblem&&!unavailableRoute&&['problems','saved','roadmap','review','roles','insights'].includes(view)){shell(`<div class="page"><h1>The collection is getting ready.</h1><p class="muted" style="margin-top:15px">Published problems will appear here.</p>${canManage()?'<button class="button" data-view="admin" style="margin-top:20px">Problem editor</button>':''}</div>`);return;}if(unavailableRoute){unavailablePage();return;}if(activeProblem)problemPage();else if(['diagnostic','plan'].includes(view))diagnostics.render(view);else if(view==='cases')engineeringCases.render();else if(view==='circuit')circuitBuilder.render();else if(view==='full-hdl')fullHDL.render();else if(view==='community')community.render();else if(view==='challenges')challenges.render();else if(view==='dashboard')dashboard.render();else if(['roadmap','review'].includes(view))practice.render(view);else if(view==='interview')interview.render();else if(view==='insights')insights.render();else if(view==='lab')simulations.render();else if(view==='learn')learning.render();else if(view==='hdl')hdlWorkbench.render();else if(view==='roles')roleTracks.render();else if(view==='debug')debugging.render();else if(view==='design')design.render();else if(view==='help')helpPage({shell,esc});else if(view==='progress')progressPage();else libraryPage()}
+function render(){if(!activeProblem&&['admin','reports','moderation'].includes(view)){if(!canManage()){unavailableWorkspacePage();return;}if(view==='admin')admin.render();else if(view==='moderation')moderation.render();else feedback.render();return;}if(session.signedIn&&learner.status.authLost)interview.discard();if(view==='account'&&!activeProblem){account.page();return;}if(view==='help'&&!activeProblem){helpPage({shell,esc});return;}if(libraryError){shell(`<div class="load-error"><h1>The library is taking a moment.</h1><p>${esc(libraryError)}</p><button class="button primary" data-action="reload">Try again</button></div>`);return;}if(session.signedIn&&(!learner.status.ready||learner.status.authLost)){shell(`<div class="account-loading"><h1>${learner.status.authLost?'Your sign-in changed.':'Your progress is taking a moment.'}</h1><p>${esc(learner.status.error||'Loading your account progress…')}</p><button class="button primary" data-view="account">Open account</button></div>`);return;}if(view==='reports'&&!activeProblem){feedback.render();return;}if(view==='admin'&&!activeProblem){admin.render();return;}if(!problems.length&&!activeProblem&&!unavailableRoute&&['problems','saved','roadmap','review','roles','insights'].includes(view)){shell(`<div class="page"><h1>The collection is getting ready.</h1><p class="muted" style="margin-top:15px">Published problems will appear here.</p>${canManage()?'<button class="button" data-view="admin" style="margin-top:20px">Problem editor</button>':''}</div>`);return;}if(unavailableRoute){unavailablePage();return;}if(activeProblem)problemPage();else if(['diagnostic','plan'].includes(view))diagnostics.render(view);else if(view==='cases')engineeringCases.render();else if(view==='circuit')circuitBuilder.render();else if(view==='full-hdl')fullHDL.render();else if(view==='community')community.render();else if(view==='challenges')challenges.render();else if(view==='dashboard')dashboard.render();else if(['roadmap','review'].includes(view))practice.render(view);else if(view==='interview')interview.render();else if(view==='insights')insights.render();else if(view==='lab')simulations.render();else if(view==='learn')learning.render();else if(view==='hdl')hdlWorkbench.render();else if(view==='roles')roleTracks.render();else if(view==='debug')debugging.render();else if(view==='design')design.render();else if(view==='progress')progressPage();else libraryPage()}
 function openProblem(id){
  if(view==='admin'&&!admin.canLeave()||view==='reports'&&!feedback.canLeave())return false;
  const p=problems.find(p=>p.id===Number(id));if(!p)return false;
@@ -246,7 +247,7 @@ function readRoute(){
  if(parsed.view!=='lab')simulations.stop();if(parsed.view!=='hdl')hdlWorkbench.stop();if(parsed.view!=='full-hdl')fullHDL.stop();if(parsed.view!=='circuit')circuitBuilder.stop();if(parsed.view!=='challenges')challenges.stop();
  if(parsed.kind==='library'){view=parsed.view;libraryFrom=view;applyLibraryFilters(parsed.filters);render();const targetScroll=libraryScroll;requestAnimationFrame(()=>{if(generation!==routeGeneration||activeProblem||view!==parsed.view)return;window.scrollTo(0,targetScroll);focusWorkspace(document);});return;}
  if(parsed.kind==='problem'){libraryFrom=parsed.from;applyLibraryFilters(parsed.filters);activeProblem=problems.find(p=>p.id===parsed.problemId)||null;view='problems';tab='description';problemOrder=problemSelection({problems,progress:saved,filters:libraryFilters(),from:libraryFrom,problemId:parsed.problemId,recommend:list=>practice.recommended(list)}).map(item=>item.id);if(!activeProblem)unavailableRoute=true;render();window.scrollTo(0,0);focusWorkspace(document);return;}
- if(parsed.kind==='feedback'){view='problems';activeProblem=parsed.problemId?problems.find(p=>p.id===parsed.problemId)||null:null;tab='description';if(parsed.problemId&&!activeProblem){unavailableRoute=true;render();focusWorkspace(document);return;}render();feedback.open(activeProblem);return;}
+ if(parsed.kind==='feedback'){libraryFrom='problems';applyLibraryFilters(parsed.filters);view='problems';activeProblem=parsed.problemId?problems.find(p=>p.id===parsed.problemId)||null:null;tab='description';problemOrder=activeProblem?problemSelection({problems,progress:saved,filters:libraryFilters(),from:libraryFrom,problemId:parsed.problemId,recommend:list=>practice.recommended(list)}).map(item=>item.id):[];if(parsed.problemId&&!activeProblem){unavailableRoute=true;render();focusWorkspace(document);return;}render();window.scrollTo(0,0);focusWorkspace(document);feedback.open(activeProblem);return;}
  if(parsed.kind==='view'){view=parsed.view;render();window.scrollTo(0,0);focusWorkspace(document);return;}
  if(parsed.from)libraryFrom=parsed.from;applyLibraryFilters(parsed.filters);view='unavailable';unavailableRoute=true;render();window.scrollTo(0,0);focusWorkspace(document);
 }
