@@ -1,3 +1,7 @@
+import {editorialCatalog,editorialContentSignature} from './editorial-catalog.js?v=807fb25cc85c75aa';
+import {editorialGuides} from './editorial-guides.js?v=807fb25cc85c75aa';
+import {editorialDeepNotes} from './editorial-deep-notes.js?v=807fb25cc85c75aa';
+
 const sources = {
   circuits:{title:'MIT 6.01SC — Circuit laws and nodal methods',url:'https://ocw.mit.edu/courses/6-01sc-introduction-to-electrical-engineering-and-computer-science-i-spring-2011/pages/unit-3-circuits/circuits/',supports:'Kirchhoff’s laws and resistor-network methods.'},
   rc:{title:'MIT 6.200 — RC Circuits Primer',url:'https://circuits.mit.edu/F25/psets/04/rc_tutorial',supports:'Capacitor initial conditions and first-order step response.'},
@@ -7,7 +11,7 @@ const sources = {
   hdl:{title:'AMD UG901 2022.1 — Verilog continuous assignments',url:'https://www.amd.com/content/dam/xilinx/support/documents/sw_manuals/xilinx2022_1/ug901-vivado-synthesis.pdf#page=253',supports:'A separately declared wire can be driven by a combinational assign statement.'}
 };
 const provenance = {authoredOn:'2026-10-12',checkedOn:'2026-10-12',author:'Original Ohm editorial',review:'Governing equations and logic were checked against the linked primary references; the numerical or Boolean cross-check is listed below. No external reviewer or institutional endorsement is claimed.',revision:1,revisionNote:'Added an alternative method, common wrong turns, a design discussion, and an explicit cross-check for problem version 1.'};
-export const editorials = [
+export const reviewedEditorials = [
   {slug:'loaded-voltage-divider',version:1,...provenance,
     takeaway:'A load changes the network. Combine branches that share both nodes before using the divider formula.',
     alternative:{title:'Use one node equation',steps:['Take ground as the reference and call the output voltage v. Write every branch current as a voltage difference divided by its resistance.','KCL gives (v − 12)/3 + v/6 + v/3 = 0, with resistances in kΩ and currents in mA. Multiplying by 6 gives 5v − 24 = 0.','Therefore v = 4.8 V. The top resistor supplies 2.4 mA; the bottom and load carry 0.8 mA and 1.6 mA. Their sum matches the supply current.'],equation:'(v − 12)/3 + v/6 + v/3 = 0 → v = 4.8 V'},
@@ -46,6 +50,30 @@ export const editorials = [
     check:'Exhaustive rows in order (00, 01, 10, 11): a ^ b and (~a & b) | (a & ~b) both produce (0, 1, 1, 0). The allowlisted checker evaluates all four cases.',transfer:'For a multiplexer, derive separate select=0 and select=1 cases and check the assignment against both.',sources:[sources.hdl,sources.logic]}
 ];
 
+const fallbackSources={'Circuit analysis':sources.circuits,'RC circuits':sources.rc,BJT:sources.bjt,MOSFET:sources.mosfet,'Digital logic':sources.logic,HDL:sources.hdl};
+const categoryForMethod=method=>method.startsWith('bjt')||method==='differential'?'BJT':method.startsWith('mos')||method==='thermal'||method==='gateDrive'?'MOSFET':method.startsWith('hdl')?'HDL':['firstOrder','charge','periodic','filter','secondOrder','integration'].includes(method)?'RC circuits':['timing','boolean','arithmetic','throughput','adc','cdc','state','interface','coding'].includes(method)?'Digital logic':'Circuit analysis';
+function methodEditorial(item){
+ const guide=editorialGuides[item.method],deep=editorialDeepNotes[item.slug];
+ if(!guide)throw new Error(`Missing editorial method ${item.method}`);
+ return {slug:item.slug,title:item.title,signature:item.signature,version:item.version,kind:'method-guide',method:item.method,difficulty:item.difficulty,
+  author:'Ohm method notes',authoredOn:'2026-10-25',revision:1,revisionNote:'Added a source-guided method comparison and explicit model boundaries for this released problem identity. Hard-problem notes include an additional case-specific derivation or check.',
+  review:'The worked trace is retained from the released solution. Method-family guidance and hard-problem extensions were authored for this catalog; this is not a claim of 216 independent editorial reviews. Primary references support the governing models, not institutional endorsement.',
+  takeaway:guide.takeaway,alternative:{title:guide.title,steps:guide.steps,equation:item.formula},
+  wrongTurns:[{claim:guide.mistake,why:guide.reason,check:guide.check},...(deep?[{claim:'A mistake specific to this question',why:deep[1],check:deep[0]}]:[])],
+  design:{title:'What changes in a real design',text:deep?`${deep[2]} ${guide.design}`:guide.design},
+  assumptions:guide.assumptions,inputs:item.inputs,workedTrace:item.trace,deepNote:deep?.[0],
+  check:`${guide.check} Case-specific reconstruction: ${item.trace.at(-1)}`,
+  transfer:guide.check,sources:item.sources.length?item.sources:[fallbackSources[categoryForMethod(item.method)]]
+ };
+}
+export const editorials=editorialCatalog.map(item=>{
+ const reviewed=reviewedEditorials.find(e=>e.slug===item.slug&&e.version===item.version);
+ return reviewed?{...reviewed,title:item.title,signature:item.signature,kind:'authored-checked',deepNote:editorialDeepNotes[item.slug]?.[0]}:methodEditorial(item);
+});
+const byIdentity=new Map(editorials.map(item=>[`${item.slug}:${item.version}`,item]));
 export function editorialForProblem(problem) {
-  return editorials.find(item=>item.slug===problem?.slug&&item.version===problem.version)||null;
+ const item=byIdentity.get(`${problem?.slug}:${problem?.version}`);
+ // Owner-edited wording, inputs, task or parts must never inherit stale notes,
+ // even if a client accidentally retains the previous numeric version.
+ return item&&item.title===problem.title&&item.signature===editorialContentSignature(problem)?item:null;
 }

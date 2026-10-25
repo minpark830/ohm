@@ -1,4 +1,4 @@
-import {draw,diagram} from './diagram-primitives.js?v=dc7cdecf1d31ff61';
+import {draw,diagram} from './diagram-primitives.js?v=807fb25cc85c75aa';
 const {box,text,arrow,path,dot,note,flow}=draw;
 const entries=[];
 function add(name,title,description,caption,body,height=380){entries.push(diagram({slug:`expansion-v5-${name}`,title,description,caption,body,height}));}
