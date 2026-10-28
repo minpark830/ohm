@@ -2,7 +2,7 @@
 // separate keys and is never automatically imported when somebody signs in.
 const clone=value=>structuredClone(value);
 export function createLabStore({kind,empty,normalize,api,session={},guestStorage,onStatus=()=>{},debounceMs=600}) {
- if(!['debugging','design','diagnostic','cases','circuit','fullhdl'].includes(kind))throw Error('Unknown practice workspace.');
+ if(!['debugging','design','diagnostic','cases','circuit','fullhdl','collections'].includes(kind))throw Error('Unknown practice workspace.');
  const accountId=session.signedIn&&session.user?.id?String(session.user.id):null;
  const signedIn=Boolean(accountId),guestMode=session.signedIn===false,key=`ohm_guest_lab_${kind}_v1`;
  let value=empty(),revision=0,ready=false,pending=false,saving=false,error='',conflict=null,authLost=false,disposed=false,serial=0,timer=null,operation=null,promise=null,baseRaw=null;

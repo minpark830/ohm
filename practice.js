@@ -1,4 +1,4 @@
-import {roadmap, reviewQueue, dailyChallenge, recommendProblems} from './practice-model.js?v=50be9e1e989012d0';
+import {roadmap, reviewQueue, dailyChallenge, recommendProblems} from './practice-model.js?v=ce80af150dbbde12';
 
 const stageIcons = {circuits: 'circuit', rc: 'capacitor', bjt: 'transistor', mosfet: 'mosfet', digital: 'logic', hdl: 'code'};
 const focuses = [['all', 'Complete path'], ['analog', 'Analog focus'], ['digital', 'Digital / HDL focus']];

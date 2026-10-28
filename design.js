@@ -1,5 +1,5 @@
-import {designChallenges,designChallenge,defaultDesignValues,normalizeDesignState,emptyDesignState,evaluateDesign,designCompletions,designFormat} from './design-model.js?v=50be9e1e989012d0';
-import {analyzeDesignCorners,designTradeoffs} from './design-corners.js?v=50be9e1e989012d0';
+import {designChallenges,designChallenge,defaultDesignValues,normalizeDesignState,emptyDesignState,evaluateDesign,designCompletions,designFormat} from './design-model.js?v=ce80af150dbbde12';
+import {analyzeDesignCorners,designTradeoffs} from './design-corners.js?v=ce80af150dbbde12';
 const path=d=>`<path d="${d}"/>`, text=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="middle" stroke="none" fill="currentColor">${t}</text>`;
 const resistor=(x,y,vertical=false)=>`<rect x="${x}" y="${y}" width="${vertical?16:64}" height="${vertical?64:16}" rx="1"/>`;
 const ground=(x,y)=>path(`M${x} ${y}v10m-15 0h30m-10 6h-10m3 6h4`);

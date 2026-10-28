@@ -22,13 +22,14 @@ function routeKind(path,method='GET'){
   const verb=String(method).toUpperCase();
   if(verb==='GET'&&/^\/api\/challenges\/(archives|ratings)$/.test(path))return 'public';
   if(verb==='GET'&&queryRoute(path,'/api/discussions',{problem:positiveQuery,version:positiveQuery},{after:v=>/^\d{1,15}$/.test(v)&&Number.isSafeInteger(Number(v)),parent:positiveQuery,sort:v=>['oldest','newest','helpful'].includes(v),kind:v=>['all','solution','question'].includes(v),q:v=>v.trim().length<=100}))return 'public';
+  if(verb==='GET'&&queryRoute(path,'/api/account/activity',{},{days:v=>['182','364'].includes(v)}))return 'account';
   if(verb==='GET'&&queryRoute(path,'/api/account/submissions',{problem:positiveQuery},{limit:v=>positiveQuery(v)&&Number(v)<=50,cursor:v=>/^[A-Za-z0-9_-]{1,4096}$/.test(v)}))return 'account';
   if(verb==='GET'&&queryRoute(path,'/api/account/submission',{problem:positiveQuery,id:v=>/^[^\u0000-\u001f\u007f]{1,256}$/.test(v)}))return 'account';
   if(path==='/api/account/discussions/helpful'&&['GET','PUT'].includes(verb)||path==='/api/account/challenges/rating'&&['GET','PUT'].includes(verb)||verb==='POST'&&path==='/api/account/challenges/upsolve'||verb==='GET'&&queryRoute(path,'/api/account/challenges/upsolve',{week:weekQuery}))return 'account';
   if(verb==='GET'&&(/^\/api\/(health|execution\/capabilities)$/.test(path)||/^\/api\/challenges(?:\/leaderboard)?(?:\?week=\d{4}-\d{2}-\d{2})?$/.test(path)||/^\/api\/discussions\?problem=[1-9]\d*&version=[1-9]\d*(?:&after=[1-9]\d*)?$/.test(path)))return 'public';
   if(verb==='GET'&&/^\/api\/variations\?kind=(divider|rc|opamp|filter|buck|adc)&seed=\d{1,10}$/.test(path)||verb==='POST'&&path==='/api/variations/check')return 'public';
   if(verb==='GET'&&/^\/api\/account\/export(?:\?table=(learner_accounts|auth_identities|learner_state|learner_solved|learner_attempts|learner_imports|learner_interviews|learner_assistance|learner_labs|community_profiles|discussion_posts|discussion_votes|challenge_runs|challenge_attempts|challenge_upsolve_attempts|challenge_rating_preferences|execution_requests)&after=\d+)?$/.test(path))return 'account';
-  if(/^\/api\/account\/labs\/(debugging|design|diagnostic|cases|circuit|fullhdl)$/.test(path)&&['GET','PUT'].includes(verb))return 'account';
+  if(/^\/api\/account\/labs\/(debugging|design|diagnostic|cases|circuit|fullhdl|collections)$/.test(path)&&['GET','PUT'].includes(verb))return 'account';
   if(/^\/api\/account\/community-profile$/.test(path)&&['GET','PUT'].includes(verb)||/^\/api\/account\/discussions$/.test(path)&&['GET','POST'].includes(verb)||path==='/api/account/discussions/remove'&&verb==='POST'||/^\/api\/account\/challenges(?:\?week=\d{4}-\d{2}-\d{2})?$/.test(path)&&verb==='GET'||/^\/api\/account\/challenges\/(join|submit|finish)$/.test(path)&&verb==='POST'||path==='/api/account/execution/run'&&verb==='POST')return 'account';
   if(path==='/api/account/interviews'&&['GET','PUT'].includes(verb))return 'account';
   if(verb==='GET'&&(path==='/api/problems'||/^\/api\/problems\/[1-9]\d*\/(hints|solution)(\?version=[1-9]\d*)?$/.test(path))||verb==='POST'&&/^\/api\/problems\/[1-9]\d*\/check$/.test(path))return 'public';

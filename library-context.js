@@ -2,16 +2,17 @@
 // supplied when filtering and is never serialized into a route or storage.
 export const libraryTopics = Object.freeze(['All', 'Circuit analysis', 'RC circuits', 'BJT', 'MOSFET', 'Digital logic', 'HDL']);
 const levels = ['All levels', 'Easy', 'Medium', 'Hard'];
-const statuses = ['all', 'unsolved', 'solved'];
-const sorts = ['recommended', 'difficulty', 'quick'];
-const views = new Set(['dashboard', 'problems', 'saved', 'progress', 'lab', 'admin', 'reports', 'account', 'roadmap', 'review', 'interview', 'insights', 'learn', 'hdl', 'help', 'roles', 'debug', 'design','diagnostic','plan','cases','circuit','full-hdl','community','challenges','moderation']);
+const statuses = ['all', 'unsolved', 'solved', 'attempted'];
+const sorts = ['recommended', 'difficulty', 'quick', 'newest', 'title'];
+const formats = ['all', 'numeric', 'parts', 'choice', 'hdl'];
+const views = new Set(['dashboard', 'problems', 'saved', 'progress', 'lab', 'admin', 'reports', 'account', 'roadmap', 'review', 'interview', 'insights', 'learn', 'hdl', 'help', 'roles', 'debug', 'design','diagnostic','plan','cases','circuit','full-hdl','community','challenges','moderation','collections','activity']);
 const sources = ['problems', 'saved'];
 const maxProblemId = 2147483647;
 const maxHashLength = 4096;
 const pick = (list, value, fallback) => list.includes(value) ? value : fallback;
 
 export function defaultLibraryFilters() {
-  return {topic: 'All', level: 'All levels', q: '', status: 'all', sort: 'recommended', scroll: 0};
+  return {topic: 'All', level: 'All levels', q: '', status: 'all', sort: 'recommended', skill: '', format: 'all', scroll: 0};
 }
 
 export function normalizeLibraryScroll(value) {
@@ -21,12 +22,12 @@ export function normalizeLibraryScroll(value) {
   return Number.isFinite(number) ? Math.max(0, Math.min(100000, Math.floor(number))) : 0;
 }
 
-function searchText(value) {
+function searchText(value, maxLength = 160) {
   if (typeof value !== 'string') return '';
   const clean = value.replace(/[\u0000-\u001f\u007f-\u009f\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, '').normalize('NFC');
   let result = '';
   for (const character of clean) {
-    if (result.length + character.length > 160) break;
+    if (result.length + character.length > maxLength) break;
     result += character;
   }
   return result;
@@ -40,6 +41,8 @@ export function normalizeLibraryFilters(raw = {}) {
     q: searchText(value.q),
     status: pick(statuses, value.status, 'all'),
     sort: pick(sorts, value.sort, 'recommended'),
+    skill: searchText(value.skill, 80).trim(),
+    format: pick(formats, value.format, 'all'),
     scroll: normalizeLibraryScroll(value.scroll)
   };
 }
@@ -73,7 +76,7 @@ export function parseWorkspaceRoute(hash = '') {
   let query;
   try { query = params(separator < 0 ? '' : raw.slice(separator + 1)); }
   catch { return route('unavailable'); }
-  const filters = normalizeLibraryFilters(Object.fromEntries(['topic', 'level', 'q', 'status', 'sort', 'scroll'].map(key => [key, query.get(key)])));
+  const filters = normalizeLibraryFilters(Object.fromEntries(['topic', 'level', 'q', 'status', 'sort', 'skill', 'format', 'scroll'].map(key => [key, query.get(key)])));
   if (!path || path === 'problems' || path === 'saved') return route('library', path || 'problems', filters);
   const problemMatch = /^problem\/([^/]+)$/.exec(path);
   if (problemMatch) {
@@ -104,7 +107,7 @@ export function workspaceHash({view = 'problems', filters, problemId: id, from} 
     path = views.has(view) ? view : 'problems';
   }
   if (path.startsWith('problem/') || sources.includes(path)) {
-    for (const key of ['topic', 'level', 'q', 'status', 'sort', 'scroll']) {
+    for (const key of ['topic', 'level', 'q', 'status', 'sort', 'skill', 'format', 'scroll']) {
       if (normalized[key] !== defaults[key]) query.set(key, String(normalized[key]));
     }
   }
@@ -124,10 +127,36 @@ function idSet(values) {
   return new Set((Array.isArray(values) ? values : []).filter(value => problemId(value) === value));
 }
 
+export function canonicalProblemTags(problem) {
+  // A skill is an exact, bounded tag from the published catalog, never a
+  // generated company label or an inferred measure of interview frequency.
+  return [...new Set((Array.isArray(problem?.tags) ? problem.tags : [])
+    .filter(tag => typeof tag === 'string')
+    .map(tag => searchText(tag, 80).trim()).filter(Boolean))].slice(0, 40);
+}
+
+export function problemFormat(problem) {
+  return problem?.type === 'multipart' ? 'parts' : formats.includes(problem?.type) && problem.type !== 'all' ? problem.type : '';
+}
+
+export function attemptedProblemIds(progress = {}) {
+  const ids = new Set();
+  for (const attempt of Array.isArray(progress?.attempts) ? progress.attempts : []) {
+    if (attempt && problemId(attempt.id) === attempt.id && typeof attempt.pass === 'boolean') ids.add(attempt.id);
+  }
+  for (const [key, review] of Object.entries(progress?.reviews && typeof progress.reviews === 'object' ? progress.reviews : {})) {
+    const id = problemId(key);
+    if (id && review && typeof review.lastPass === 'boolean' && Number.isFinite(Date.parse(review.lastAt))) ids.add(id);
+  }
+  return ids;
+}
+
 function publicMatch(problem, filters) {
   const tags = Array.isArray(problem.tags) ? problem.tags.filter(tag => typeof tag === 'string').join(' ') : '';
   return (filters.topic === 'All' || problem.category === filters.topic) &&
     (filters.level === 'All levels' || problem.difficulty === filters.level) &&
+    (!filters.skill || canonicalProblemTags(problem).includes(filters.skill)) &&
+    (filters.format === 'all' || problemFormat(problem) === filters.format) &&
     `${problem.title || ''} ${tags} ${problem.category || ''} ${problem.id}`.toLowerCase().includes(filters.q.toLowerCase());
 }
 
@@ -140,6 +169,12 @@ function ordered(list, filters, recommend) {
   } else if (filters.sort === 'quick') {
     const minutes = problem => typeof problem.minutes === 'number' && Number.isFinite(problem.minutes) && problem.minutes >= 0 ? problem.minutes : Infinity;
     list.sort((a, b) => minutes(a) - minutes(b) || byId(a, b));
+  } else if (filters.sort === 'newest') {
+    // Database IDs are stable import/addition order, not an invented publish date.
+    list.sort((a, b) => b.id - a.id);
+  } else if (filters.sort === 'title') {
+    const compare = new Intl.Collator('en', {numeric: true, sensitivity: 'base'});
+    list.sort((a, b) => compare.compare(String(a.title || ''), String(b.title || '')) || byId(a, b));
   } else if (typeof recommend === 'function') {
     const candidates = new Map(list.map(problem => [problem.id, problem]));
     const result = recommend([...list]);
@@ -159,9 +194,10 @@ function selection({problems, progress = {}, filters, view = 'problems', anchor 
   const normalized = normalizeLibraryFilters(filters);
   const solved = idSet(progress?.solved);
   const bookmarked = idSet(progress?.bookmarks);
+  const attempted = attemptedProblemIds(progress);
   const list = publicCatalog(problems).filter(problem => publicMatch(problem, normalized) &&
     (problem.id === anchor || ((view !== 'saved' || bookmarked.has(problem.id)) &&
-      (normalized.status === 'all' || (normalized.status === 'solved' ? solved.has(problem.id) : !solved.has(problem.id))))));
+      (normalized.status === 'all' || (normalized.status === 'solved' ? solved.has(problem.id) : normalized.status === 'attempted' ? attempted.has(problem.id) : !solved.has(problem.id))))));
   return ordered(list, normalized, recommend);
 }
 

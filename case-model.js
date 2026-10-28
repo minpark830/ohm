@@ -1,4 +1,4 @@
-import {engineeringCases,engineeringCase} from './case-data.js?v=50be9e1e989012d0';
+import {engineeringCases,engineeringCase} from './case-data.js?v=ce80af150dbbde12';
 export {engineeringCases,engineeringCase};
 const object=value=>value&&typeof value==='object'&&!Array.isArray(value);
 export const caseFormat=(value,unit='')=>`${Number(value.toPrecision(5)).toLocaleString('en-US',{maximumFractionDigits:7})}${unit?' '+unit:''}`;
