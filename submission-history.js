@@ -19,20 +19,21 @@ const formatDate=value=>{const date=new Date(value);return Number.isFinite(date.
 const unavailable='This older browser or imported attempt saved its outcome only. The original answer was not stored.';
 
 /** Account-bound history UI. All source stays in memory; no local storage is used. */
-export function createSubmissionHistory({api,getSession=()=>({signedIn:false}),getAuthLost=()=>false,getGuestAttempts=()=>[],readDraft=()=>'',onRestore=()=>false,toast=()=>{},pageSize=10}={}){
+export function createSubmissionHistory({api,getSession=()=>({signedIn:false}),getAuthLost=()=>false,getGuestAttempts=()=>[],readDraft=()=>'',onRestore=()=>false,toast=()=>{},pageSize=10,timeoutMs=20000}={}){
  if(typeof api!=='function')throw new Error('An Ohm API client is required.');
+ const requestTimeout=Number.isFinite(timeoutMs)?Math.max(1,Math.min(60000,timeoutMs)):20000;
  let host=null,problem=null,context='',generation=0,items=[],total=0,nextCursor=null,selectedId=null,selected=null,loading=false,loadingDetail=false,error='',detailError='',restorePending=false,comparison=null,comparing=false,disposed=false,focusDetail=false;
- const details=new Map(),controllers=new Set();
+ const details=new Map(),controllers=new Map();
  const account=()=>{const session=getSession();return session?.signedIn&&session.user?.id?String(session.user.id):null;};
  function active(accountId,token){return !disposed&&token===generation&&account()===accountId&&!getAuthLost();}
- function clearRequests(){generation++;for(const controller of controllers)controller.abort();controllers.clear();}
+ function clearRequests(){generation++;for(const [controller,timer] of controllers){clearTimeout(timer);controller.abort();}controllers.clear();}
  function reset(){clearRequests();items=[];total=0;nextCursor=null;selectedId=null;selected=null;loading=false;loadingDetail=false;error='';detailError='';restorePending=false;comparison=null;comparing=false;focusDetail=false;details.clear();}
  function node(tag,className,text){const result=host.ownerDocument.createElement(tag);if(className)result.className=className;if(text!==undefined)result.textContent=text;return result;}
  function button(text,handler,{disabled=false,className='button'}={}){const value=node('button',className,text);value.type='button';value.disabled=disabled;value.addEventListener('click',handler);return value;}
  async function request(path,accountId,token){
   if(!active(accountId,token))throw new Error('Your sign-in changed. Reload before viewing submissions.');
-  const controller=new AbortController();controllers.add(controller);
-  try{const result=await api(path,{method:'GET',headers:{'X-Ohm-Account-ID':accountId},signal:controller.signal});if(!active(accountId,token))throw new Error('Your sign-in changed. Reload before viewing submissions.');if(String(result?.accountId)!==accountId){reset();context='';render();throw Object.assign(new Error('Your sign-in changed. Reload before viewing submissions.'),{accountChanged:true});}return result;}finally{controllers.delete(controller);}
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(Object.assign(new Error('Your submission history is taking longer than expected. Please try again.'),{name:'TimeoutError'})),requestTimeout);controllers.set(controller,timer);
+  try{const result=await api(path,{method:'GET',headers:{'X-Ohm-Account-ID':accountId},signal:controller.signal});if(!active(accountId,token))throw new Error('Your sign-in changed. Reload before viewing submissions.');if(String(result?.accountId)!==accountId){reset();context='';render();throw Object.assign(new Error('Your sign-in changed. Reload before viewing submissions.'),{accountChanged:true});}return result;}finally{clearTimeout(timer);controllers.delete(controller);}
  }
  function summaryMeta(item){return `${formatDate(item.at)} · ${item.version?'v'+item.version:'version unknown'} · ${item.source==='imported'?'imported outcome':item.source==='browser'?'browser outcome':item.assistance==='independent'?'independent':item.assistance==='hint'?'hint viewed':item.assistance==='solution'?'solution viewed':'assistance unknown'}`;}
  function render(){

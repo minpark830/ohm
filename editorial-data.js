@@ -1,6 +1,6 @@
-import {editorialCatalog,editorialContentSignature} from './editorial-catalog.js?v=ce80af150dbbde12';
-import {editorialGuides} from './editorial-guides.js?v=ce80af150dbbde12';
-import {editorialDeepNotes} from './editorial-deep-notes.js?v=ce80af150dbbde12';
+import {editorialCatalog,editorialContentSignature} from './editorial-catalog.js?v=d8a3ac5afc6a4ca2';
+import {editorialGuides} from './editorial-guides.js?v=d8a3ac5afc6a4ca2';
+import {editorialDeepNotes} from './editorial-deep-notes.js?v=d8a3ac5afc6a4ca2';
 
 const sources = {
   circuits:{title:'MIT 6.01SC — Circuit laws and nodal methods',url:'https://ocw.mit.edu/courses/6-01sc-introduction-to-electrical-engineering-and-computer-science-i-spring-2011/pages/unit-3-circuits/circuits/',supports:'Kirchhoff’s laws and resistor-network methods.'},

@@ -1,4 +1,4 @@
-import {libraryTopics,defaultLibraryFilters,normalizeLibraryFilters,filterProblems,canonicalProblemTags,problemFormat,attemptedProblemIds} from './library-context.js?v=ce80af150dbbde12';
+import {libraryTopics,defaultLibraryFilters,normalizeLibraryFilters,filterProblems,canonicalProblemTags,problemFormat,attemptedProblemIds} from './library-context.js?v=d8a3ac5afc6a4ca2';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const compareText=new Intl.Collator('en',{numeric:true,sensitivity:'base'});
@@ -34,7 +34,7 @@ export function libraryActiveFilters(filters){
 export function clearedLibraryFilter(filters,key){
   const f=normalizeLibraryFilters(filters),defaults=defaultLibraryFilters();
   if(Object.hasOwn(defaults,key)&&key!=='scroll')f[key]=defaults[key];
-  return {...f,scroll:0};
+  return {...f,page:1,scroll:0};
 }
 
 export function libraryDiscoveryMarkup({problems=[],progress={},filters,view='problems',resultCount}={}){

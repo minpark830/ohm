@@ -111,7 +111,9 @@ export function createLearnerStore({api,session={},guest={},onStatus=()=>{},onRe
     else if(!guestMode)throw new Error(loadError);
     else if(disposed)throw new Error('This workspace is closed.');
     const key=`${field}:${problemId}`;
-    if(readField(field,problemId)===value)return;
+    // A missing draft may display starter code. Clearing it is a real edit,
+    // distinct from an already-saved empty string, so retain that first clear.
+    if(readField(field,problemId)===value&&(field!=='draft'||Object.hasOwn(state.drafts,problemId)))return;
     writeField(field,problemId,value);changed.set(key,{field,problemId,serial:++serial});
     if(!signedIn){remote();return;}
     let entry=fields.get(key);

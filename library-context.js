@@ -12,7 +12,7 @@ const maxHashLength = 4096;
 const pick = (list, value, fallback) => list.includes(value) ? value : fallback;
 
 export function defaultLibraryFilters() {
-  return {topic: 'All', level: 'All levels', q: '', status: 'all', sort: 'recommended', skill: '', format: 'all', scroll: 0};
+  return {topic: 'All', level: 'All levels', q: '', status: 'all', sort: 'recommended', skill: '', format: 'all', page: 1, pageSize: 25, scroll: 0};
 }
 
 export function normalizeLibraryScroll(value) {
@@ -43,6 +43,8 @@ export function normalizeLibraryFilters(raw = {}) {
     sort: pick(sorts, value.sort, 'recommended'),
     skill: searchText(value.skill, 80).trim(),
     format: pick(formats, value.format, 'all'),
+    page: ['string','number'].includes(typeof value.page)&&/^(?:[1-9]\d{0,4}|100000)$/.test(String(value.page)) ? Number(value.page) : 1,
+    pageSize: ['string','number'].includes(typeof value.pageSize)&&/^(25|50|100)$/.test(String(value.pageSize)) ? Number(value.pageSize) : 25,
     scroll: normalizeLibraryScroll(value.scroll)
   };
 }
@@ -76,7 +78,7 @@ export function parseWorkspaceRoute(hash = '') {
   let query;
   try { query = params(separator < 0 ? '' : raw.slice(separator + 1)); }
   catch { return route('unavailable'); }
-  const filters = normalizeLibraryFilters(Object.fromEntries(['topic', 'level', 'q', 'status', 'sort', 'skill', 'format', 'scroll'].map(key => [key, query.get(key)])));
+  const filters = normalizeLibraryFilters(Object.fromEntries(['topic', 'level', 'q', 'status', 'sort', 'skill', 'format', 'page', 'pageSize', 'scroll'].map(key => [key, query.get(key)])));
   if (!path || path === 'problems' || path === 'saved') return route('library', path || 'problems', filters);
   const problemMatch = /^problem\/([^/]+)$/.exec(path);
   if (problemMatch) {
@@ -107,7 +109,7 @@ export function workspaceHash({view = 'problems', filters, problemId: id, from} 
     path = views.has(view) ? view : 'problems';
   }
   if (path.startsWith('problem/') || sources.includes(path)) {
-    for (const key of ['topic', 'level', 'q', 'status', 'sort', 'skill', 'format', 'scroll']) {
+    for (const key of ['topic', 'level', 'q', 'status', 'sort', 'skill', 'format', 'page', 'pageSize', 'scroll']) {
       if (normalized[key] !== defaults[key]) query.set(key, String(normalized[key]));
     }
   }

@@ -1,4 +1,4 @@
-import {activityDays,guestActivity,normalizeAccountActivity,calendarWeeks,activityLevel} from './activity-model.js?v=ce80af150dbbde12';
+import {activityDays,guestActivity,normalizeAccountActivity,calendarWeeks,activityLevel} from './activity-model.js?v=d8a3ac5afc6a4ca2';
 
 const fallbackEscape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fullDate=value=>new Date(value+'T12:00:00.000Z').toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric',timeZone:'UTC'});

@@ -1,5 +1,5 @@
 .reference-open{font-size:12px;padding:8px 11px;color:var(--green-dark)}
-.reference-drawer{position:fixed;inset:0 0 0 auto;margin:0;width:min(500px,100vw);max-width:100vw;height:100vh;height:100dvh;max-height:none;padding:0;border:0;border-left:1px solid var(--line);background:var(--paper);color:var(--text);box-shadow:-12px 0 55px #142d1d20;overflow:hidden}
+.reference-drawer{position:fixed;inset:0 0 0 auto;margin:0;width:min(500px,100%);max-width:100%;height:100vh;height:100dvh;max-height:none;padding:0;border:0;border-left:1px solid var(--line);background:var(--paper);color:var(--text);box-shadow:-12px 0 55px #142d1d20;overflow:hidden}
 .reference-drawer[open]{display:flex;flex-direction:column}
 .reference-drawer::backdrop{background:#0d191570}
 .reference-header{display:flex;align-items:start;gap:18px;padding:27px 28px 23px;border-bottom:1px solid var(--line);flex-shrink:0;background:var(--paper)}
@@ -18,4 +18,4 @@
 .reference-prefixes{margin:17px 0 19px;font-size:12px;text-align:left}.reference-prefixes caption{text-align:left;color:var(--muted);font-size:10px;margin-bottom:8px}.reference-prefixes th,.reference-prefixes td{border-bottom:1px solid var(--line);padding:7px 10px 7px 0}.reference-prefixes thead th{font-size:10px;font-weight:500;color:var(--muted)}.reference-prefixes tbody th{font-weight:400}.reference-prefixes td{font-family:var(--mono);color:var(--text)}.reference-prefixes td:last-child{font-size:11px}
 .reference-footer{padding:17px 28px;border-top:1px solid var(--line);background:var(--bg);font-size:10px;color:var(--muted);line-height:1.8;flex-shrink:0}
 .theme-dark .reference-drawer{box-shadow:-12px 0 55px #0005}.theme-dark .reference-drawer::backdrop{background:#020805a8}
-@media(max-width:550px){.reference-drawer{width:100vw;border:0}.reference-header{padding:23px 21px 20px;gap:9px}.reference-header h2{font-size:22px}.reference-body{padding:21px 21px 28px}.reference-footer{padding:15px 21px}.reference-open{font-size:11px;padding:7px 9px}.reference-source{padding:4px 0}}
+@media(max-width:550px){.reference-drawer{width:100%;border:0}.reference-header{padding:23px 21px 20px;gap:9px}.reference-header h2{font-size:22px}.reference-body{padding:21px 21px 28px}.reference-footer{padding:15px 21px}.reference-open{font-size:11px;padding:7px 9px}.reference-source{padding:4px 0}}

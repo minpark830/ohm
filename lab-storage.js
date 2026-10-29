@@ -5,7 +5,7 @@ export function createLabStore({kind,empty,normalize,api,session={},guestStorage
  if(!['debugging','design','diagnostic','cases','circuit','fullhdl','collections'].includes(kind))throw Error('Unknown practice workspace.');
  const accountId=session.signedIn&&session.user?.id?String(session.user.id):null;
  const signedIn=Boolean(accountId),guestMode=session.signedIn===false,key=`ohm_guest_lab_${kind}_v1`;
- let value=empty(),revision=0,ready=false,pending=false,saving=false,error='',conflict=null,authLost=false,disposed=false,serial=0,timer=null,operation=null,promise=null,baseRaw=null;
+ let value=empty(),revision=0,ready=false,pending=false,saving=false,error='',conflict=null,authLost=false,disposed=false,serial=0,readGeneration=0,timer=null,operation=null,promise=null,loadPromise=null,baseRaw=null;
  const status=()=>({signedIn,ready,pending,saving,error,conflict:Boolean(conflict),authLost});
  const notify=()=>{if(!disposed)onStatus(status());};
  const checked=raw=>{if(JSON.stringify(raw).length>90000)throw Error('This practice workspace is too large to save.');return normalize(raw);};
@@ -18,16 +18,20 @@ export function createLabStore({kind,empty,normalize,api,session={},guestStorage
   return {...result,value:checked(result.value)};
  }
  async function load(){
+  if(loadPromise)return loadPromise;
   if(disposed||pending||authLost)throw Error('Save or resolve your current practice before loading it.');
-  try{
-   if(signedIn){const result=await request('GET');if(disposed||authLost)return clone(value);value=result.value;revision=result.revision;}
-   else if(guestMode){if(!guestStorage)throw Error('Browser storage is unavailable.');baseRaw=guestStorage.getItem(key);value=baseRaw?checked(JSON.parse(baseRaw)):empty();}
+  const sequence=serial,generation=readGeneration;
+  const loading=(async()=>{try{
+   if(signedIn){const result=await request('GET');if(disposed||authLost||generation!==readGeneration||serial!==sequence||pending)return clone(value);value=result.value;revision=result.revision;}
+   else if(guestMode){if(!guestStorage)throw Error('Browser storage is unavailable.');const raw=guestStorage.getItem(key),restored=raw?checked(JSON.parse(raw)):empty();value=restored;baseRaw=raw;}
    else throw Error('Your sign-in could not be checked. Reload to continue.');
    ready=true;error='';notify();return clone(value);
   }catch(e){
-   if(guestMode){value=empty();ready=true;error='Saved browser practice could not be read. New work is kept in this tab until it can be saved.';notify();return clone(value);}
+   if(disposed||generation!==readGeneration)return clone(value);
+   if(guestMode){ready=true;error='Saved browser practice could not be read. New work is kept in this tab until it can be saved.';notify();return clone(value);}
    fail(e);throw e;
-  }
+  }})();loadPromise=loading;
+  try{return await loading;}finally{if(loadPromise===loading)loadPromise=null;}
  }
  function set(next){ensure();value=checked(next);serial++;pending=true;error='';clearTimeout(timer);timer=setTimeout(()=>{timer=null;void flush();},debounceMs);notify();}
  async function flush(){
@@ -65,7 +69,7 @@ export function createLabStore({kind,empty,normalize,api,session={},guestStorage
  function beforeUnload(event){if(pending){event.preventDefault();event.returnValue='';}}
  globalThis.window?.addEventListener('beforeunload',beforeUnload);
  return {get state(){return clone(value);},get status(){return status();},get hasPending(){return pending;},load,set,flush,retry,useRemote,
-  invalidateAuth(){authLost=true;clearTimeout(timer);error='Your sign-in changed. Reload before continuing.';notify();},
+  invalidateAuth(){authLost=true;readGeneration++;loadPromise=null;clearTimeout(timer);error='Your sign-in changed. Reload before continuing.';notify();},
   async resumeAuth(current){if(!current.signedIn||String(current.user?.id)!==accountId)throw Error('Sign back into the original account to save this practice.');session.csrfToken=current.csrfToken;authLost=false;return retry();},
   dispose(){disposed=true;clearTimeout(timer);value=empty();globalThis.window?.removeEventListener('beforeunload',beforeUnload);}
  };

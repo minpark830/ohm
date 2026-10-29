@@ -1,4 +1,4 @@
-import {emptyCollectionsState,normalizeCollectionsState,emptyCollectionDraft,saveCollection,setCollectionProblem,moveCollectionProblem,deleteCollection,restoreCollection,purgeCollection,collectionSummary,publicCollectionCatalog} from './collections-model.js?v=ce80af150dbbde12';
+import {emptyCollectionsState,normalizeCollectionsState,emptyCollectionDraft,saveCollection,setCollectionProblem,moveCollectionProblem,deleteCollection,restoreCollection,purgeCollection,collectionSummary,publicCollectionCatalog} from './collections-model.js?v=d8a3ac5afc6a4ca2';
 
 export function createCollections({shell,esc,icon=()=>'',toast=()=>{},getProblems=()=>[],getProgress=()=>({}),storage=null,navigate=()=>{},openProblem=()=>{},isActive=()=>true,now=()=>Date.now()}){
  let state=emptyCollectionsState(),hydrated=!storage,confirm=null,confirmRemote=false,lastLocked=null,picker=null,pickerProblem=null,pickerFocus=null;
@@ -15,7 +15,13 @@ export function createCollections({shell,esc,icon=()=>'',toast=()=>{},getProblem
  function change(update){try{return commit(update(state));}catch(error){toast(error.message||'The collection change could not be saved.');return false;}}
  function draw(focus){if(!isActive())return;render();if(focus)globalThis.document?.querySelector(focus)?.focus();}
  function restore(){if(storage&&(!storage.status.ready||storage.status.authLost))return;try{state=storage?normalizeCollectionsState(storage.state):state;hydrated=true;confirm=null;confirmRemote=false;}catch(error){hydrated=false;toast(error.message);}}
+ function hasChangedDraft(){
+  const draft=state.draft;if(!draft.active)return false;
+  const original=draft.id?state.lists.find(list=>list.id===draft.id):null;
+  return original?draft.name!==original.name||draft.description!==original.description||draft.addProblemId!==null:Boolean(draft.name.trim()||draft.description.trim()||draft.addProblemId!==null);
+ }
  function newDraft(problem=null){
+  if(hasChangedDraft()){toast('Finish or cancel your current collection draft before creating another.');return false;}
   if(state.lists.length+state.deleted.length>=20){toast('You have 20 saved collections. Permanently remove a deleted collection to create another.');return false;}
   const next=structuredClone(state);next.draft={...emptyCollectionDraft(),active:true,addProblemId:currentProblem(problem)?.id||null};
   if(!commit(next))return false;confirm=null;return true;
@@ -42,7 +48,7 @@ export function createCollections({shell,esc,icon=()=>'',toast=()=>{},getProblem
   if(!editable()){toast('Wait for collections to load, or resolve the save conflict first.');return true;}
   if(button.dataset.collectionSelect){const next=structuredClone(state);next.selected=button.dataset.collectionSelect;if(commit(next)){confirm=null;draw('#collection-detail-title');}return true;}
   if(action==='new'){if(newDraft())draw('#collection-name');return true;}
-  if(button.dataset.collectionEdit){const list=state.lists.find(item=>item.id===button.dataset.collectionEdit);if(list){const next=structuredClone(state);next.draft={active:true,id:list.id,name:list.name,description:list.description,addProblemId:null};if(commit(next))draw('#collection-name');}return true;}
+  if(button.dataset.collectionEdit){const list=state.lists.find(item=>item.id===button.dataset.collectionEdit);if(list){if(state.draft.active&&state.draft.id===list.id){draw('#collection-name');return true;}if(hasChangedDraft()){toast('Finish or cancel your current collection draft before editing another.');draw('#collection-name');return true;}const next=structuredClone(state);next.draft={active:true,id:list.id,name:list.name,description:list.description,addProblemId:null};if(commit(next))draw('#collection-name');}return true;}
   if(action==='cancel-edit'){const next=structuredClone(state);next.draft=emptyCollectionDraft();if(commit(next))draw();return true;}
   if(button.dataset.collectionDelete||button.dataset.collectionPurge){confirm={id:button.dataset.collectionDelete||button.dataset.collectionPurge,kind:button.dataset.collectionPurge?'purge':'delete'};draw('[data-collection-action="confirm-delete"]');return true;}
   if(action==='cancel-delete'){confirm=null;draw();return true;}

@@ -1,4 +1,5 @@
-import {lessonForProblem} from './learning-data.js?v=ce80af150dbbde12';
+import {createEngineeringTools} from './engineering-tools.js?v=d8a3ac5afc6a4ca2';
+import {lessonForProblem} from './learning-data.js?v=d8a3ac5afc6a4ca2';
 
 // These are general references, separate from problem hints and worked solutions.
 // Prefix definitions: https://www.nist.gov/pml/owm/metric-si-prefixes
@@ -29,10 +30,11 @@ export function referenceContent(problem,esc){
 }
 
 export function createReferenceDrawer({esc,icon,getProblem,toast=()=>{}}){
- let opened=false,opener=null,activeDialog=null;
+ let opened=false,opener=null,activeDialog=null,activeTab='reference';
+ const tools=createEngineeringTools({esc});
  const dialog=()=>document.querySelector(`#${DIALOG_ID}`);
  function buttonMarkup(){return `<button class="button reference-open" type="button" data-reference-action="open" aria-haspopup="dialog" aria-controls="${DIALOG_ID}">${icon('book',16)}EE reference</button>`;}
- function markup(){return `<dialog id="${DIALOG_ID}" class="reference-drawer" aria-modal="true" aria-labelledby="ee-reference-title" aria-describedby="ee-reference-description"><header class="reference-header"><div><span class="eyebrow">QUICK REFERENCE</span><h2 id="ee-reference-title">A little help with the basics.</h2><p id="ee-reference-description">General equations and conventions. Your problem stays open alongside.</p></div><button class="icon-button reference-close" type="button" data-reference-action="close" aria-label="Close EE reference">${icon('close',20)}</button></header><div class="reference-body" data-reference-body></div><footer class="reference-footer">General reference only. Opening this drawer does not record a hint or mark a problem solved.</footer></dialog>`;}
+ function markup(){return `<dialog id="${DIALOG_ID}" class="reference-drawer" aria-modal="true" aria-labelledby="ee-reference-title" aria-describedby="ee-reference-description"><header class="reference-header"><div><span class="eyebrow">QUICK REFERENCE</span><h2 id="ee-reference-title">A little help with the basics.</h2><p id="ee-reference-description">General equations and conventions. Your problem stays open alongside.</p></div><button class="icon-button reference-close" type="button" data-reference-action="close" aria-label="Close EE reference">${icon('close',20)}</button></header><div class="reference-tabs" role="tablist" aria-label="Reference tools">${[['reference','Formulas & units'],['calculator','EE calculator']].map(([id,label])=>`<button type="button" id="ee-reference-tab-${id}" class="filter-tab ${activeTab===id?'active':''}" role="tab" tabindex="${activeTab===id?0:-1}" aria-controls="ee-reference-panel" aria-selected="${activeTab===id}" data-reference-tab="${id}">${label}</button>`).join('')}</div><div id="ee-reference-panel" class="reference-body" data-reference-body role="tabpanel" aria-labelledby="ee-reference-tab-${activeTab}"></div><footer class="reference-footer">General reference and calculation tools. Inputs stay in this tab. This drawer does not record a hint or mark a problem solved.</footer></dialog>`;}
  function close({restoreFocus=true}={}){
   const wasOpen=opened||activeDialog?.open;
   const previous=opener;opened=false;opener=null;
@@ -49,12 +51,14 @@ export function createReferenceDrawer({esc,icon,getProblem,toast=()=>{}}){
   if(!current||typeof current.showModal!=='function'){toast('The reference could not open. Please reload and try again.');return;}
   if(opened)close({restoreFocus:false});
   const body=current.querySelector('[data-reference-body]');if(!body)return;
-  body.innerHTML=referenceContent(getProblem?.(),esc);
+  body.innerHTML=activeTab==='calculator'?tools.markup():referenceContent(getProblem?.(),esc);
   opener=trigger||document.activeElement;activeDialog=current;
   try{current.showModal();opened=true;current.querySelector('[data-reference-action="close"]')?.focus({preventScroll:true});}
   catch{opened=false;activeDialog=null;opener=null;toast('The reference could not open. Please reload and try again.');}
  }
  function onClick(event){
+  const tab=event.target?.closest?.('[data-reference-tab]');if(opened&&tab&&['reference','calculator'].includes(tab.dataset.referenceTab)){activeTab=tab.dataset.referenceTab;const current=dialog(),body=current?.querySelector('[data-reference-body]');if(body){body.innerHTML=activeTab==='calculator'?tools.markup():referenceContent(getProblem?.(),esc);body.setAttribute('aria-labelledby','ee-reference-tab-'+activeTab);}for(const button of current?.querySelectorAll('[data-reference-tab]')||[]){const selected=button.dataset.referenceTab===activeTab;button.classList.toggle('active',selected);button.setAttribute('aria-selected',String(selected));button.setAttribute('tabindex',selected?'0':'-1');}return true;}
+  if(opened&&activeTab==='calculator'&&tools.onClick(event))return true;
   const action=event.target?.closest?.('[data-reference-action]');
   if(action){if(action.dataset.referenceAction==='open')open(action);else if(action.dataset.referenceAction==='close')close();return true;}
   if(opened&&event.target===activeDialog){
@@ -74,5 +78,5 @@ export function createReferenceDrawer({esc,icon,getProblem,toast=()=>{}}){
   else if(!event.shiftKey&&(focused===last||!activeDialog.contains(focused))){event.preventDefault();first.focus();}
   return true;
  }
- return {buttonMarkup,markup,onClick,onKeydown,close,isOpen:()=>opened&&Boolean(activeDialog?.open)};
+ return {buttonMarkup,markup,onClick,onKeydown,close,onInput:event=>opened&&activeTab==='calculator'&&tools.onInput(event),onChange:event=>opened&&activeTab==='calculator'&&tools.onChange(event),clear(){close({restoreFocus:false});tools.clear();activeTab='reference';},isOpen:()=>opened&&Boolean(activeDialog?.open)};
 }
