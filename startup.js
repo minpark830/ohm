@@ -2,7 +2,7 @@
 // Dependencies are injectable so slow networks and failed imports are testable.
 export async function startWorkspace({
   document: page = globalThis.document,
-  load = () => import('./app.js?v=d8a3ac5afc6a4ca2'),
+  load = () => import('./app.js?v=6b0d117a75d1508a'),
   schedule = globalThis.setTimeout,
   cancel = globalThis.clearTimeout,
   reload = () => globalThis.location.reload(),

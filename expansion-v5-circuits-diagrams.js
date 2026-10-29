@@ -1,4 +1,4 @@
-import {draw,diagram} from './diagram-primitives.js?v=d8a3ac5afc6a4ca2';
+import {draw,diagram} from './diagram-primitives.js?v=6b0d117a75d1508a';
 const {path,text,dot,ground,arrow,resistor,capacitor,source,current,box,note}=draw;
 const meter=(x,y)=>`<circle cx="${x}" cy="${y}" r="24" fill="none" stroke="var(--diagram-muted, #788690)" stroke-width="2"/>`+text(x,y+5,'V');
 const add=(slug,title,description,caption,body,height)=>diagram({slug:`expansion-v5-${slug}`,title,description,caption,body,...(height?{height}:{})});

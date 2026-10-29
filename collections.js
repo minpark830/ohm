@@ -1,4 +1,4 @@
-import {emptyCollectionsState,normalizeCollectionsState,emptyCollectionDraft,saveCollection,setCollectionProblem,moveCollectionProblem,deleteCollection,restoreCollection,purgeCollection,collectionSummary,publicCollectionCatalog} from './collections-model.js?v=d8a3ac5afc6a4ca2';
+import {emptyCollectionsState,normalizeCollectionsState,emptyCollectionDraft,saveCollection,setCollectionProblem,moveCollectionProblem,deleteCollection,restoreCollection,purgeCollection,collectionSummary,publicCollectionCatalog} from './collections-model.js?v=6b0d117a75d1508a';
 
 export function createCollections({shell,esc,icon=()=>'',toast=()=>{},getProblems=()=>[],getProgress=()=>({}),storage=null,navigate=()=>{},openProblem=()=>{},isActive=()=>true,now=()=>Date.now()}){
  let state=emptyCollectionsState(),hydrated=!storage,confirm=null,confirmRemote=false,lastLocked=null,picker=null,pickerProblem=null,pickerFocus=null;

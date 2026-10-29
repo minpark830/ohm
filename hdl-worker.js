@@ -1,2 +1,2 @@
-import {runClockedExercise} from './hdl-model.js?v=d8a3ac5afc6a4ca2';
+import {runClockedExercise} from './hdl-model.js?v=6b0d117a75d1508a';
 self.onmessage=event=>{try{self.postMessage({ok:true,result:runClockedExercise(event.data)});}catch(error){self.postMessage({ok:false,error:error.message});}};

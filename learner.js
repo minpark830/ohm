@@ -25,7 +25,7 @@ export function createLearnerStore({api,session={},guest={},onStatus=()=>{},onRe
   const accountId=session.signedIn&&session.user?.id?String(session.user.id):null;
   const signedIn=!!accountId;
   const guestMode=session.signedIn===false;
-  let state=guestMode?normalize(guest):emptyProgress(),profile=null,ready=guestMode,loading=false,authLost=false,disposed=false,loadError=guestMode||signedIn?'':'Your sign-in could not be checked. Reload to continue.',activity=0,serial=0,loadVersion=0,importOperation=null;
+  let state=guestMode?normalize(guest):emptyProgress(),profile=null,ready=guestMode,loading=false,authLost=false,disposed=false,loadError=guestMode||signedIn?'':'Your sign-in could not be checked. Reload to continue.',activity=0,serial=0,loadVersion=0,authGeneration=0,importOperation=null;
   const revisions=new Map(),fields=new Map(),changed=new Map(),submissions=new Map();
   const uuid=()=>globalThis.crypto.randomUUID();
   const snapshot=()=>copy(state);
@@ -43,8 +43,8 @@ export function createLearnerStore({api,session={},guest={},onStatus=()=>{},onRe
     if(authLost)throw new Error('Your sign-in changed or expired. Reload before saving.');
     if(requireReady&&!ready)throw new Error('Wait until your account progress has loaded before saving.');
   }
-  function recordFailure(error){
-    if(error.status===401||error.data?.accountChanged){
+  function recordFailure(error,generation=authGeneration){
+    if(generation===authGeneration&&(error.status===401||error.data?.accountChanged)){
       authLost=true;
       for(const entry of fields.values()){clearTimeout(entry.timer);entry.timer=null;}
     }
@@ -52,11 +52,9 @@ export function createLearnerStore({api,session={},guest={},onStatus=()=>{},onRe
   }
   async function request(path,method='GET',body){
     ensureActive(false);
-    try{
-      const result=await api(path,{method,headers:{'X-Ohm-Account-ID':accountId,...(method==='GET'?{}:{'X-CSRF-Token':session.csrfToken})},...(body===undefined?{}:{body:JSON.stringify(body)})});
-      if(result?.accountId!==undefined&&String(result.accountId)!==accountId)throw Object.assign(new Error('Your sign-in changed. Reload before saving.'),{status:409,data:{accountChanged:true}});
-      return result;
-    }catch(error){recordFailure(error);throw error;}
+    const result=await api(path,{method,headers:{'X-Ohm-Account-ID':accountId,...(method==='GET'?{}:{'X-CSRF-Token':session.csrfToken})},...(body===undefined?{}:{body:JSON.stringify(body)})});
+    if(result?.accountId!==undefined&&String(result.accountId)!==accountId)throw Object.assign(new Error('Your sign-in changed. Reload before saving.'),{status:409,data:{accountChanged:true}});
+    return result;
   }
   function readField(field,problemId,source=state){return field==='bookmark'?source.bookmarks.includes(problemId):(field==='note'?source.notes:source.drafts)[problemId]||'';}
   function writeField(field,problemId,value,target=state){
@@ -89,13 +87,13 @@ export function createLearnerStore({api,session={},guest={},onStatus=()=>{},onRe
   async function load(){
     if(!signedIn){if(!guestMode)throw new Error(loadError);return snapshot();}
     ensureActive(false);
-    const version=++loadVersion,startSerial=serial;
+    const version=++loadVersion,startSerial=serial,generation=authGeneration;
     loading=true;notify();
     try{
       const data=await request('/api/account/progress');
       if(!disposed&&!authLost&&version===loadVersion)applySnapshot(data,startSerial);
       return snapshot();
-    }catch(error){if(!disposed&&version===loadVersion)loadError=recordFailure(error);throw error;}
+    }catch(error){if(!disposed&&version===loadVersion)loadError=recordFailure(error,generation);throw error;}
     finally{if(version===loadVersion){loading=false;notify();}}
   }
   function schedule(entry){
@@ -125,7 +123,7 @@ export function createLearnerStore({api,session={},guest={},onStatus=()=>{},onRe
     if(entry.promise)return entry.promise;
     if(disposed||authLost||entry.conflict||!fields.has(entry.key))return;
     clearTimeout(entry.timer);entry.timer=null;
-    const operation=entry.operation||{problemId:entry.problemId,field:entry.field,value:entry.value,revision:entry.revision,operationId:uuid(),sequence:entry.sequence};
+    const generation=authGeneration,operation=entry.operation||{problemId:entry.problemId,field:entry.field,value:entry.value,revision:entry.revision,operationId:uuid(),sequence:entry.sequence};
     entry.operation=operation;entry.error='';activity++;
     entry.promise=(async()=>{
       try{
@@ -140,7 +138,7 @@ export function createLearnerStore({api,session={},guest={},onStatus=()=>{},onRe
         remote();
       }catch(error){
         if(disposed)return;
-        entry.error=recordFailure(error);
+        entry.error=recordFailure(error,generation);
         if(!authLost&&error.status===409&&error.data?.current){
           entry.conflict={...error.data.current};entry.operation=null;
           entry.error='This value changed on another device. Choose which version to keep.';
@@ -170,7 +168,9 @@ export function createLearnerStore({api,session={},guest={},onStatus=()=>{},onRe
     }
     notify();return true;
   }
-  function retryable(error){return !error.status||error.status>=500||error.status===429||error.status===408;}
+  // Authentication failures retain the original operation for an exact retry
+  // after renewal, including replies from the session that was just replaced.
+  function retryable(error){return !error.status||error.status>=500||error.status===429||error.status===408||error.status===401||error.data?.accountChanged;}
   function acceptSubmission(result,operation){
     const attempt=result.attempt||{id:operation.payload.problemId,pass:!!result.pass,at:new Date().toISOString(),submissionId:operation.payload.submissionId};
     const normalized=normalize({attempts:[{...attempt,submissionId:attempt.submissionId||operation.payload.submissionId}]}).attempts;
@@ -183,14 +183,14 @@ export function createLearnerStore({api,session={},guest={},onStatus=()=>{},onRe
   }
   async function sendSubmission(operation){
     if(operation.promise)return operation.promise;
-    ensureActive();activity++;operation.error='';
+    ensureActive();const generation=authGeneration;activity++;operation.error='';
     operation.promise=(async()=>{
       try{
         const result=await request('/api/account/submit','POST',operation.payload);
         if(!disposed&&!authLost){acceptSubmission(result,operation);submissions.delete(operation.key);}
         return result;
       }catch(error){
-        if(!disposed){operation.error=recordFailure(error);if(!authLost&&!retryable(error))submissions.delete(operation.key);}
+        if(!disposed){operation.error=recordFailure(error,generation);if(!authLost&&!retryable(error))submissions.delete(operation.key);}
         throw error;
       }finally{operation.promise=null;activity--;notify();}
     })();
@@ -205,14 +205,14 @@ export function createLearnerStore({api,session={},guest={},onStatus=()=>{},onRe
   }
   async function sendImport(operation){
     if(operation.promise)return operation.promise;
-    ensureActive();const startSerial=serial;activity++;operation.error='';
+    ensureActive();const startSerial=serial,generation=authGeneration;activity++;operation.error='';
     operation.promise=(async()=>{
       try{
         const result=await request('/api/account/import','POST',operation.payload);
         if(!disposed&&!authLost){applySnapshot(result,startSerial);if(importOperation===operation)importOperation=null;}
         return snapshot();
       }catch(error){
-        if(!disposed){operation.error=recordFailure(error);if(!authLost&&!retryable(error)&&importOperation===operation)importOperation=null;}
+        if(!disposed){operation.error=recordFailure(error,generation);if(!authLost&&!retryable(error)&&importOperation===operation)importOperation=null;}
         throw error;
       }finally{operation.promise=null;activity--;notify();}
     })();
@@ -258,5 +258,5 @@ export function createLearnerStore({api,session={},guest={},onStatus=()=>{},onRe
     fields.clear();submissions.clear();importOperation=null;state=emptyProgress();profile=null;
     globalThis.window?.removeEventListener('beforeunload',beforeUnload);
   }
-  return {get state(){return snapshot();},get profile(){return profile?{...profile}:null;},get signedIn(){return signedIn;},get status(){return getStatus();},get hasPending(){return pending()>0;},async resumeAuth(current){if(!current.signedIn||String(current.user?.id)!==accountId)throw new Error('Sign back into the original account to save this tab’s pending work. Your changes are still here.');session.csrfToken=current.csrfToken;authLost=false;await retry();},invalidateAuth(){recordFailure({status:401,message:'Your sign-in changed.'});notify();},load,refresh:load,setField,resolveConflict,submit,importGuest,flush,retry,dispose};
+  return {get state(){return snapshot();},get profile(){return profile?{...profile}:null;},get signedIn(){return signedIn;},get status(){return getStatus();},get hasPending(){return pending()>0;},async resumeAuth(current){if(!current.signedIn||String(current.user?.id)!==accountId)throw new Error('Sign back into the original account to save this tab’s pending work. Your changes are still here.');authGeneration++;loadVersion++;loading=false;session.csrfToken=current.csrfToken;authLost=false;await retry();},invalidateAuth(){authGeneration++;loadVersion++;loading=false;recordFailure({status:401,message:'Your sign-in changed.'});notify();},load,refresh:load,setField,resolveConflict,submit,importGuest,flush,retry,dispose};
 }

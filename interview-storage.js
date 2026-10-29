@@ -6,7 +6,7 @@ const key = 'ohm_guest_interviews_v1';
 function guestValue(raw) {
   const object = value => Boolean(value && typeof value === 'object' && !Array.isArray(value));
   const integer = value => Number.isSafeInteger(value) && value >= 0;
-  if (!object(raw) || !Array.isArray(raw.history) || raw.history.length > 20 || JSON.stringify(raw).length > 500000) return empty();
+  if (!object(raw) || !Array.isArray(raw.history) || raw.history.length > 20 || JSON.stringify(raw).length > 500000) throw new Error('Saved browser interview is invalid.');
   const seen=new Set();
   function valid(item, archived=false) {
     if (!object(item) || !object(item.session)) return false;
@@ -29,19 +29,19 @@ function guestValue(raw) {
     for (const [id,a] of Object.entries(s.answers)) if (!object(a)||!ids.has(a.problemId)||String(a.problemId)!==id||typeof a.pass!=='boolean'||!integer(a.startedAt)||!integer(a.receivedAt)||a.startedAt<s.startedAt||a.startedAt>=Math.min(s.deadline,s.endedAt??s.deadline)||a.receivedAt<a.startedAt) return false;
     return true;
   }
-  if (raw.current !== null && !valid(raw.current) || raw.history.some(item=>!valid(item,true))) return empty();
+  if (raw.current !== null && !valid(raw.current) || raw.history.some(item=>!valid(item,true))) throw new Error('Saved browser interview is invalid.');
   return clone(raw);
 }
 
 export function createInterviewStore({api, session = {}, guestStorage, onStatus = () => {}, debounceMs = 600}) {
   const accountId = session.signedIn && session.user?.id ? String(session.user.id) : null;
   const signedIn = Boolean(accountId), guestMode = session.signedIn === false;
-  let value = empty(), revision = 0, ready = false, pending = false, saving = false, error = '', conflict = null, authLost = false, disposed = false, operation = null, serial = 0, timer = null, promise = null;
+  let value = empty(), revision = 0, ready = false, pending = false, saving = false, error = '', conflict = null, authLost = false, disposed = false, operation = null, serial = 0, generation = 0, timer = null, promise = null, loadPromise = null, baseRaw = null;
   const status = () => ({signedIn, ready, pending, saving, error, conflict: Boolean(conflict), authLost});
   const notify = () => { if (!disposed) onStatus(status()); };
   function ensure() { if (disposed) throw new Error('This interview workspace is closed.'); if (authLost) throw new Error('Your sign-in changed. Reload before saving your interview.'); if (!ready) throw new Error('Wait for your saved interviews to load.'); }
-  function fail(e) {
-    if (e.status === 401 || e.data?.accountChanged) authLost = true;
+  function fail(e, token = generation) {
+    if (token === generation && (e.status === 401 || e.data?.accountChanged)) authLost = true;
     error = authLost ? 'Your sign-in changed. Sign back into the original account before saving this interview.' : e.message || 'Your interview could not be saved. Retry before closing this tab.';
     notify();
   }
@@ -51,16 +51,21 @@ export function createInterviewStore({api, session = {}, guestStorage, onStatus 
     return result;
   }
   async function load() {
-    if (disposed || pending) throw new Error('Save your current interview before reloading it.');
-    try {
-      if (signedIn) { const result = await request('GET'); if (disposed) return empty(); value = clone(result.value); revision = result.revision; }
-      else if (guestMode) { const raw = guestStorage?.getItem(key); value = raw ? guestValue(JSON.parse(raw)) : empty(); }
+    if (loadPromise) return loadPromise;
+    if (disposed || pending || authLost) throw new Error('Save or resolve your current interview before reloading it.');
+    const sequence = serial, token = generation;
+    const loading = (async () => { try {
+      if (signedIn) { const result = await request('GET'); if (disposed || authLost || token !== generation || serial !== sequence || pending) return clone(value); value = clone(result.value); revision = result.revision; }
+      else if (guestMode) { if (!guestStorage) throw new Error('Browser storage is unavailable.'); const raw = guestStorage.getItem(key), restored = raw ? guestValue(JSON.parse(raw)) : empty(); value = restored; baseRaw = raw; }
       else throw new Error('Your sign-in could not be checked. Reload to continue.');
       ready = true; error = ''; notify(); return clone(value);
     } catch (e) {
-      if (guestMode) { value=empty(); ready=true; error=e instanceof SyntaxError?'':'Browser storage is unavailable. Keep this tab open; new interview changes cannot be saved yet.'; notify(); return clone(value); }
-      fail(e); throw e;
-    }
+      if (disposed || token !== generation) return clone(value);
+      if (guestMode) { ready=true; error='Saved browser interviews could not be read. Keep this tab open; new interview changes cannot be saved yet.'; notify(); return clone(value); }
+      fail(e, token); throw e;
+    } })();
+    loadPromise = loading;
+    try { return await loading; } finally { if (loadPromise === loading) loadPromise = null; }
   }
   function set(next) {
     ensure();
@@ -74,12 +79,16 @@ export function createInterviewStore({api, session = {}, guestStorage, onStatus 
     clearTimeout(timer); timer=null;
     if (disposed || !ready || !pending || authLost || conflict) return status();
     if (!signedIn) {
-      try { if (!guestStorage) throw new Error('Browser storage is unavailable. Keep this tab open to retain your interview.'); guestStorage.setItem(key, JSON.stringify(value)); pending=false; error=''; }
-      catch (e) { fail(e); }
+      try {
+        if (!guestStorage) throw new Error('Browser storage is unavailable.');
+        const remoteRaw = guestStorage.getItem(key);
+        if (remoteRaw !== baseRaw) { conflict = {value:remoteRaw ? guestValue(JSON.parse(remoteRaw)) : empty(), raw:remoteRaw}; error='Your interview changed in another tab. Load the saved version before replacing this tab’s unsaved changes.'; }
+        else { const raw = JSON.stringify(value); guestStorage.setItem(key, raw); baseRaw=raw; pending=false; error=''; }
+      } catch { fail(new Error('Saved browser interviews could not be read or written. Keep this tab open and retry to retain your work.')); }
       notify(); return status();
     }
     operation ||= {revision, operationId:crypto.randomUUID(), value:clone(value), serial};
-    const sending = operation;
+    const sending = operation, token = generation;
     saving=true; error='';
     promise=(async () => {
       try {
@@ -93,7 +102,7 @@ export function createInterviewStore({api, session = {}, guestStorage, onStatus 
           if (e.status===409 && e.data?.current && !e.data?.accountChanged) {conflict=clone(e.data.current);operation=null;}
           // Keep unknown outcomes for exact retries; rejected input needs a new key.
           else if (e.status && e.status<500 && ![401,408,429].includes(e.status)) operation=null;
-          fail(e);
+          fail(e, token);
         }
       } finally { saving=false;promise=null;notify(); }
       if (!disposed && pending && !error && !conflict && !authLost) return flush();
@@ -102,11 +111,11 @@ export function createInterviewStore({api, session = {}, guestStorage, onStatus 
     notify(); return promise;
   }
   async function retry() { if (authLost || disposed || conflict) return status(); if (!ready) {try {await load();} catch {return status();}} error=''; return flush(); }
-  function useRemote() { ensure(); if (!conflict) return clone(value); value=clone(conflict.value);revision=conflict.revision;conflict=null;pending=false;operation=null;error='';serial++;notify();return clone(value); }
+  function useRemote() { ensure(); if (!conflict) return clone(value); value=clone(conflict.value);if(signedIn)revision=conflict.revision;else baseRaw=conflict.raw;conflict=null;pending=false;operation=null;error='';serial++;notify();return clone(value); }
   function beforeUnload(event) {if(pending) {event.preventDefault();event.returnValue='';}}
   globalThis.window?.addEventListener('beforeunload', beforeUnload);
   return {get state(){return clone(value);},get status(){return status();},get hasPending(){return pending;},load,set,flush,retry,useRemote,
-    invalidateAuth(){authLost=true;clearTimeout(timer);error='Your sign-in changed. Reload before continuing.';notify();},
-    async resumeAuth(current){if(!current.signedIn||String(current.user?.id)!==accountId)throw new Error('Sign back into the original account to save this interview.');session.csrfToken=current.csrfToken;authLost=false;return retry();},
-    dispose(){disposed=true;clearTimeout(timer);value=empty();globalThis.window?.removeEventListener('beforeunload',beforeUnload);}};
+    invalidateAuth(){authLost=true;generation++;loadPromise=null;clearTimeout(timer);error='Your sign-in changed. Reload before continuing.';notify();},
+    async resumeAuth(current){if(!current.signedIn||String(current.user?.id)!==accountId)throw new Error('Sign back into the original account to save this interview.');generation++;loadPromise=null;session.csrfToken=current.csrfToken;authLost=false;return retry();},
+    dispose(){disposed=true;generation++;loadPromise=null;clearTimeout(timer);value=empty();globalThis.window?.removeEventListener('beforeunload',beforeUnload);}};
 }

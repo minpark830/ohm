@@ -1,8 +1,8 @@
-import {roleTrackById,resolveRoleTrack} from './role-track-data.js?v=d8a3ac5afc6a4ca2';
+import {roleTrackById,resolveRoleTrack} from './role-track-data.js?v=6b0d117a75d1508a';
 import {
   interviewTopics, selectInterviewProblems, createInterviewSession,
   remainingMs, recordInterviewAnswer, finishInterview, sessionScore
-} from './interview-model.js?v=d8a3ac5afc6a4ca2';
+} from './interview-model.js?v=6b0d117a75d1508a';
 
 const presets = {
   mixed: {label: 'Mixed interview', note: 'A little of everything', topics: [...interviewTopics]},
@@ -155,11 +155,11 @@ export function createInterview({
     const disabled = locked ? 'disabled' : '';
     if (problem.type === 'multipart') {
       let parts={};try { const parsed=JSON.parse(value||'{}');if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))parts=parsed; } catch {}
-      return `<div class="interview-multipart">${(problem.parts||[]).map(part=>`<label class="answer-label" for="interview-part-${esc(part.id)}">${esc(part.label)}<div class="answer-input"><input id="interview-part-${esc(part.id)}" data-interview-answer="${problem.id}" data-interview-part="${esc(part.id)}" type="text" autocomplete="off" maxlength="150" placeholder="Value or expression" value="${esc(Object.hasOwn(parts,part.id)?parts[part.id]:'')}" ${disabled}><span>${esc(part.unit||'')}</span></div></label>`).join('')}</div><p class="hint-text">Include a unit or use the unit shown. Submit all parts together.</p>`;
+      return `<div class="interview-multipart">${(problem.parts||[]).map(part=>`<label class="answer-label" for="interview-part-${esc(part.id)}">${esc(part.label)}<div class="answer-input"><input id="interview-part-${esc(part.id)}" data-interview-answer="${problem.id}" data-interview-part="${esc(part.id)}" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="150" placeholder="Value or expression" value="${esc(Object.hasOwn(parts,part.id)?parts[part.id]:'')}" ${disabled}><span>${esc(part.unit||'')}</span></div></label>`).join('')}</div><p class="hint-text">Include a unit or use the unit shown. Submit all parts together.</p>`;
     }
     if (problem.type === 'choice') return `<fieldset class="interview-answer-options" ${disabled}><legend class="answer-label">Choose your answer</legend>${(problem.options || []).map((option, index) => `<label class="choice"><input type="radio" name="interview-answer" value="${index}" data-interview-answer="${problem.id}" ${value === String(index) ? 'checked' : ''}><span>${esc(option)}</span></label>`).join('')}</fieldset>`;
     if (problem.type === 'hdl') return `<label class="answer-label" for="interview-answer">Verilog · continuous assignment</label><textarea id="interview-answer" data-interview-answer="${problem.id}" class="code-editor" maxlength="2500" spellcheck="false" autocomplete="off" placeholder="assign y = …;" ${disabled}>${esc(value)}</textarea><p class="code-description">One-bit, 0/1 truth-table checker. Supports ~ ! &amp; ^ | &amp;&amp; || == != and ?: . No module declarations, timing, or X/Z simulation.</p>`;
-    return `<label class="answer-label" for="interview-answer">Your answer</label><div class="answer-input"><input id="interview-answer" data-interview-answer="${problem.id}" type="text" inputmode="decimal" autocomplete="off" maxlength="2500" placeholder="Enter a value" value="${esc(value)}" ${disabled}><span>${esc(problem.unit || '')}</span></div><p class="hint-text">Use ${esc(problem.unit || 'the requested units')}.${Number.isFinite(problem.tolerance) ? ` Accepted tolerance: ±${esc(problem.tolerance)} ${esc(problem.unit || '')}.` : ''}</p>`;
+    return `<label class="answer-label" for="interview-answer">Your answer</label><div class="answer-input"><input id="interview-answer" data-interview-answer="${problem.id}" type="text" inputmode="text" autocapitalize="off" spellcheck="false" autocomplete="off" maxlength="2500" placeholder="Enter a value" value="${esc(value)}" ${disabled}><span>${esc(problem.unit || '')}</span></div><p class="hint-text">Use ${esc(problem.unit || 'the requested units')}.${Number.isFinite(problem.tolerance) ? ` Accepted tolerance: ±${esc(problem.tolerance)} ${esc(problem.unit || '')}.` : ''}</p>`;
   }
 
   function activePage() {

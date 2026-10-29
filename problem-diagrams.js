@@ -1,8 +1,8 @@
-import {problemDiagramAssets} from './problem-diagram-assets.js?v=d8a3ac5afc6a4ca2';
-import {expandedProblemDiagramAssets} from './expanded-problem-diagrams.js?v=d8a3ac5afc6a4ca2';
-import {v4ProblemDiagrams} from './expansion-v4-diagrams.js?v=d8a3ac5afc6a4ca2';
-import {v5ProblemDiagrams} from './expansion-v5-diagrams.js?v=d8a3ac5afc6a4ca2';
-import {v6ProblemDiagrams} from './expansion-v6-diagrams.js?v=d8a3ac5afc6a4ca2';
+import {problemDiagramAssets} from './problem-diagram-assets.js?v=6b0d117a75d1508a';
+import {expandedProblemDiagramAssets} from './expanded-problem-diagrams.js?v=6b0d117a75d1508a';
+import {v4ProblemDiagrams} from './expansion-v4-diagrams.js?v=6b0d117a75d1508a';
+import {v5ProblemDiagrams} from './expansion-v5-diagrams.js?v=6b0d117a75d1508a';
+import {v6ProblemDiagrams} from './expansion-v6-diagrams.js?v=6b0d117a75d1508a';
 const originalSlugs=['one-loop-two-resistors','balance-the-node','loaded-voltage-divider','floating-source-supernode','rc-time-constant','charging-after-one-tau','discharge-to-quarter-voltage','loaded-rc-transient','bjt-current-gain','bjt-switch-current-limit','emitter-resistor-bias','bjt-transconductance','identify-nmos-region','nmos-saturation-current','nmos-triode-current','nmos-source-self-bias','boolean-absorption','full-adder-output','signed-addition-overflow','setup-time-budget','write-a-two-input-xor','write-a-two-to-one-mux','nonblocking-pipeline-step','repair-combinational-sensitivity'];
 // Expansion IDs depend on the database's insertion history; match immutable slugs.
 const diagrams=new Map([...problemDiagramAssets.map(diagram=>[originalSlugs[diagram.id-1],diagram]),...expandedProblemDiagramAssets.map(diagram=>[diagram.slug,diagram]),...v4ProblemDiagrams.map(diagram=>[diagram.slug,diagram]),...v5ProblemDiagrams.map(diagram=>[diagram.slug,diagram]),...v6ProblemDiagrams.map(diagram=>[diagram.slug,diagram])]);
