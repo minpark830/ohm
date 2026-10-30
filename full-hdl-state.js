@@ -1,4 +1,4 @@
-import {fullHDLExercises} from './full-hdl-catalog.js?v=6b0d117a75d1508a';
+import {fullHDLExercises} from './full-hdl-catalog.js?v=f7435ebd4a867484';
 const ids=fullHDLExercises.map(p=>p.id);
 export function emptyFullHDLState(){return {schemaVersion:1,selected:'fifo',codes:{},stimulus:{}};}
 export function normalizeFullHDLState(input){

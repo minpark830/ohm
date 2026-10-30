@@ -1,4 +1,4 @@
-import {focusWorkspace} from './navigation-a11y.js?v=6b0d117a75d1508a';
+import {focusWorkspace} from './navigation-a11y.js?v=f7435ebd4a867484';
 
 // Update existing controls so an autosave never detaches the focused button or
 // a modal's return-focus target. No drafts or feedback are replaced here.

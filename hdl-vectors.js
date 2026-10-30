@@ -1,4 +1,4 @@
-import {fullHDLExercises} from './full-hdl-catalog.js?v=6b0d117a75d1508a';
+import {fullHDLExercises} from './full-hdl-catalog.js?v=f7435ebd4a867484';
 // The only editable testbench input is a bounded table of signal values. It
 // never accepts source, expected results, commands, timing, or file paths.
 export function validateHDLVectors(exerciseId,value){

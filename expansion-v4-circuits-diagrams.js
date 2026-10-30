@@ -1,4 +1,4 @@
-import {draw,diagram} from './diagram-primitives.js?v=6b0d117a75d1508a';
+import {draw,diagram} from './diagram-primitives.js?v=f7435ebd4a867484';
 const {path,text,dot,ground,arrow,resistor,capacitor,source,current,box,note,rc}=draw;
 // Inductor terminals are (x,y) and (xx,y); all coils are local authored SVG.
 const inductor=(x,y,xx,label)=>{const mid=(x+xx)/2;return path(`M${x} ${y}H${mid-48}c0-20 24-20 24 0c0-20 24-20 24 0c0-20 24-20 24 0c0-20 24-20 24 0H${xx}`)+text(mid,y-29,label);};

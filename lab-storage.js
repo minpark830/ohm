@@ -2,7 +2,7 @@
 // separate keys and is never automatically imported when somebody signs in.
 const clone=value=>structuredClone(value);
 export function createLabStore({kind,empty,normalize,api,session={},guestStorage,onStatus=()=>{},debounceMs=600}) {
- if(!['debugging','design','diagnostic','cases','circuit','fullhdl','collections'].includes(kind))throw Error('Unknown practice workspace.');
+ if(!['debugging','design','diagnostic','cases','circuit','fullhdl','collections','notebook'].includes(kind))throw Error('Unknown practice workspace.');
  const accountId=session.signedIn&&session.user?.id?String(session.user.id):null;
  const signedIn=Boolean(accountId),guestMode=session.signedIn===false,key=`ohm_guest_lab_${kind}_v1`;
  let value=empty(),revision=0,ready=false,pending=false,saving=false,error='',conflict=null,authLost=false,disposed=false,serial=0,readGeneration=0,timer=null,operation=null,promise=null,loadPromise=null,baseRaw=null;
@@ -10,7 +10,7 @@ export function createLabStore({kind,empty,normalize,api,session={},guestStorage
  const notify=()=>{if(!disposed)onStatus(status());};
  const checked=raw=>{if(JSON.stringify(raw).length>90000)throw Error('This practice workspace is too large to save.');return normalize(raw);};
  const ensure=()=>{if(disposed||authLost)throw Error('Your sign-in changed. Reload before changing this practice workspace.');if(!ready)throw Error('Wait for saved practice to load.');if(conflict)throw Error('Practice changed elsewhere. Load the saved version before continuing.');};
- function fail(e){if(e.status===401||e.data?.accountChanged)authLost=true;error=authLost?'Your sign-in changed. Sign back into the original account before saving.':e.message||'Practice could not be saved. Keep this tab open and retry.';notify();}
+ function fail(e,generation=readGeneration){if(generation===readGeneration&&(e.status===401||e.data?.accountChanged))authLost=true;error=authLost?'Your sign-in changed. Sign back into the original account before saving.':e.message||'Practice could not be saved. Keep this tab open and retry.';notify();}
  async function request(method,body){
   const result=await api(`/api/account/labs/${kind}`,{method,signal:AbortSignal.timeout(20000),headers:{'X-Ohm-Account-ID':accountId,...(method==='GET'?{}:{'X-CSRF-Token':session.csrfToken})},...(body?{body:JSON.stringify(body)}:{})});
   if(String(result?.accountId)!==accountId)throw Object.assign(Error('Your sign-in changed.'),{status:409,data:{accountChanged:true}});
@@ -47,7 +47,7 @@ export function createLabStore({kind,empty,normalize,api,session={},guestStorage
    }catch(e){fail(e);}notify();return status();
   }
   operation||={revision,operationId:crypto.randomUUID(),value:clone(value),serial};
-  const sending=operation;saving=true;error='';
+  const sending=operation,generation=readGeneration;saving=true;error='';
   promise=(async()=>{
    try{
     const {serial:sequence,...body}=sending,result=await request('PUT',body);
@@ -57,8 +57,8 @@ export function createLabStore({kind,empty,normalize,api,session={},guestStorage
    }catch(e){if(!disposed){
     if(e.status===409&&e.data?.current&&!e.data?.accountChanged){
      try{const remote=e.data.current;if(!Number.isSafeInteger(remote.revision)||remote.revision<0)throw Error('Invalid saved revision');conflict={value:checked(remote.value),revision:remote.revision};operation=null;}catch{error='The saved practice response was invalid. Keep this tab open and retry.';notify();return status();}
-    }else if(e.status&&e.status<500&&![401,408,429].includes(e.status))operation=null;
-    fail(e);
+    }else if(e.status&&e.status<500&&![401,408,429].includes(e.status)&&!e.data?.accountChanged)operation=null;
+    fail(e,generation);
    }}finally{saving=false;promise=null;notify();}
    if(!disposed&&pending&&!error&&!conflict&&!authLost)return flush();
    return status();
@@ -70,7 +70,7 @@ export function createLabStore({kind,empty,normalize,api,session={},guestStorage
  globalThis.window?.addEventListener('beforeunload',beforeUnload);
  return {get state(){return clone(value);},get status(){return status();},get hasPending(){return pending;},load,set,flush,retry,useRemote,
   invalidateAuth(){authLost=true;readGeneration++;loadPromise=null;clearTimeout(timer);error='Your sign-in changed. Reload before continuing.';notify();},
-  async resumeAuth(current){if(!current.signedIn||String(current.user?.id)!==accountId)throw Error('Sign back into the original account to save this practice.');session.csrfToken=current.csrfToken;authLost=false;return retry();},
+  async resumeAuth(current){if(!current.signedIn||String(current.user?.id)!==accountId)throw Error('Sign back into the original account to save this practice.');readGeneration++;loadPromise=null;session.csrfToken=current.csrfToken;authLost=false;return retry();},
   dispose(){disposed=true;clearTimeout(timer);value=empty();globalThis.window?.removeEventListener('beforeunload',beforeUnload);}
  };
 }
