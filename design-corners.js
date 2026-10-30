@@ -1,4 +1,4 @@
-import {designChallenge,evaluateDesign,normalizeDesignValues} from './design-model.js?v=f7435ebd4a867484';
+import {designChallenge,evaluateDesign,normalizeDesignValues} from './design-model.js?v=5601ad9fd5efe681';
 
 // Explicit exercise envelopes, not guaranteed characterizations of a named part.
 // Interval endpoints include independent component errors. Common ambient temperature

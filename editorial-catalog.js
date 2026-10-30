@@ -1,5 +1,6 @@
+import {v7EditorialCatalog} from './expansion-v7-editorials.js?v=5601ad9fd5efe681';
 // Released problem identities and worked traces. Source problem data is immutable.
-// These are source-guided teaching notes, not 216 independent editorial reviews.
+// These are source-guided teaching notes; the separately checked editorials retain their own provenance.
 export const editorialCatalog = [
   {
     "slug": "one-loop-two-resistors",
@@ -5961,7 +5962,8 @@ export const editorialCatalog = [
         "supports": "Continuous assignments and scalar Boolean and conditional operators provide combinational logic. The four new HDL functions are original fully specified known-bit exercises, with expected rows derived independently of their reference assignments."
       }
     ]
-  }
+  },
+  ...v7EditorialCatalog
 ];
 
 export function editorialContentSignature(problem){let h=2166136261;const input=JSON.stringify([problem.title,problem.prompt,problem.task,problem.given,problem.type,problem.parts?.map(({id,label,unit})=>({id,label,unit}))??null]);for(let i=0;i<input.length;i++){h^=input.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0).toString(16).padStart(8,'0');}

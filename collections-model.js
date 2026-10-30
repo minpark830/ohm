@@ -1,5 +1,5 @@
 // Private study organization only. Membership cannot create a solve or grade.
-export const collectionLimits=Object.freeze({lists:20,problems:216,name:80,description:240});
+export const collectionLimits=Object.freeze({lists:20,problems:240,name:80,description:240});
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const object=value=>!!value&&typeof value==='object'&&!Array.isArray(value)&&(Object.getPrototypeOf(value)===Object.prototype||Object.getPrototypeOf(value)===null);
 const own=(value,key)=>Object.prototype.hasOwnProperty.call(value,key);
@@ -38,13 +38,13 @@ export function saveCollection(raw,{id:listId,name,description='',at=Date.now(),
   let list=state.lists.find(item=>item.id===listId);
   if(!list){if(state.lists.length+state.deleted.length>=20)throw Error('You have 20 saved collections. Permanently remove a deleted collection before creating another.');if(state.deleted.some(item=>item.id===listId))throw Error('Restore the deleted collection first.');list={id:listId,name:'',description:'',problemIds:[],createdAt:at,updatedAt:at};state.lists.push(list);}
   list.name=text(name,80,true);list.description=text(description,240).trim();list.updatedAt=nextTime(list,at);
-  if(addProblemId!==null&&!list.problemIds.includes(addProblemId)){if(list.problemIds.length>=216)throw Error('A collection can hold at most 216 problems.');list.problemIds.push(addProblemId);}
+  if(addProblemId!==null&&!list.problemIds.includes(addProblemId)){if(list.problemIds.length>=collectionLimits.problems)throw Error(`A collection can hold at most ${collectionLimits.problems} problems.`);list.problemIds.push(addProblemId);}
   state.selected=listId;state.draft=emptyCollectionDraft();
  });
 }
 export function setCollectionProblem(raw,listId,problem,include,at=Date.now()){
  if(!problemId(problem)||typeof include!=='boolean')throw Error('Choose a valid problem.');
- return modify(raw,state=>{const list=find(state,listId),has=list.problemIds.includes(problem);if(include&&!has){if(list.problemIds.length>=216)throw Error('A collection can hold at most 216 problems.');list.problemIds.push(problem);}else if(!include&&has)list.problemIds=list.problemIds.filter(value=>value!==problem);list.updatedAt=nextTime(list,at);});
+ return modify(raw,state=>{const list=find(state,listId),has=list.problemIds.includes(problem);if(include&&!has){if(list.problemIds.length>=collectionLimits.problems)throw Error(`A collection can hold at most ${collectionLimits.problems} problems.`);list.problemIds.push(problem);}else if(!include&&has)list.problemIds=list.problemIds.filter(value=>value!==problem);list.updatedAt=nextTime(list,at);});
 }
 export function moveCollectionProblem(raw,listId,problem,direction,at=Date.now()){
  if(!problemId(problem)||![1,-1].includes(direction))throw Error('Choose a valid reorder direction.');

@@ -1,3 +1,5 @@
+import {companyIds,matchesCompanyProblem} from './company-data.js?v=5601ad9fd5efe681';
+
 // Only public browsing preferences belong in the hash. Account progress is
 // supplied when filtering and is never serialized into a route or storage.
 export const libraryTopics = Object.freeze(['All', 'Circuit analysis', 'RC circuits', 'BJT', 'MOSFET', 'Digital logic', 'HDL']);
@@ -5,14 +7,14 @@ const levels = ['All levels', 'Easy', 'Medium', 'Hard'];
 const statuses = ['all', 'unsolved', 'solved', 'attempted'];
 const sorts = ['recommended', 'difficulty', 'quick', 'newest', 'title'];
 const formats = ['all', 'numeric', 'parts', 'choice', 'hdl'];
-const views = new Set(['dashboard', 'problems', 'saved', 'progress', 'lab', 'admin', 'reports', 'account', 'roadmap', 'review', 'interview', 'insights', 'learn', 'hdl', 'help', 'roles', 'debug', 'design','diagnostic','plan','cases','circuit','full-hdl','community','challenges','moderation','collections','activity','notebook']);
+const views = new Set(['dashboard', 'problems', 'saved', 'progress', 'lab', 'admin', 'reports', 'account', 'roadmap', 'review', 'interview', 'insights', 'learn', 'hdl', 'help', 'roles', 'debug', 'design','diagnostic','plan','cases','circuit','full-hdl','community','challenges','moderation','collections','activity','notebook','companies']);
 const sources = ['problems', 'saved'];
 const maxProblemId = 2147483647;
 const maxHashLength = 4096;
 const pick = (list, value, fallback) => list.includes(value) ? value : fallback;
 
 export function defaultLibraryFilters() {
-  return {topic: 'All', level: 'All levels', q: '', status: 'all', sort: 'recommended', skill: '', format: 'all', page: 1, pageSize: 25, scroll: 0};
+  return {topic: 'All', level: 'All levels', q: '', status: 'all', sort: 'recommended', skill: '', company: '', format: 'all', page: 1, pageSize: 25, scroll: 0};
 }
 
 export function normalizeLibraryScroll(value) {
@@ -42,6 +44,7 @@ export function normalizeLibraryFilters(raw = {}) {
     status: pick(statuses, value.status, 'all'),
     sort: pick(sorts, value.sort, 'recommended'),
     skill: searchText(value.skill, 80).trim(),
+    company: pick(companyIds, value.company, ''),
     format: pick(formats, value.format, 'all'),
     page: ['string','number'].includes(typeof value.page)&&/^(?:[1-9]\d{0,4}|100000)$/.test(String(value.page)) ? Number(value.page) : 1,
     pageSize: ['string','number'].includes(typeof value.pageSize)&&/^(25|50|100)$/.test(String(value.pageSize)) ? Number(value.pageSize) : 25,
@@ -78,7 +81,7 @@ export function parseWorkspaceRoute(hash = '') {
   let query;
   try { query = params(separator < 0 ? '' : raw.slice(separator + 1)); }
   catch { return route('unavailable'); }
-  const filters = normalizeLibraryFilters(Object.fromEntries(['topic', 'level', 'q', 'status', 'sort', 'skill', 'format', 'page', 'pageSize', 'scroll'].map(key => [key, query.get(key)])));
+  const filters = normalizeLibraryFilters(Object.fromEntries(['topic', 'level', 'q', 'status', 'sort', 'skill', 'company', 'format', 'page', 'pageSize', 'scroll'].map(key => [key, query.get(key)])));
   if (!path || path === 'problems' || path === 'saved') return route('library', path || 'problems', filters);
   const problemMatch = /^problem\/([^/]+)$/.exec(path);
   if (problemMatch) {
@@ -91,7 +94,7 @@ export function parseWorkspaceRoute(hash = '') {
     const id = feedbackMatch[1] === 'new' ? null : problemId(feedbackMatch[1]);
     return feedbackMatch[1] === 'new' || id ? route('feedback', 'problems', defaultLibraryFilters(), id) : route('unavailable');
   }
-  return views.has(path) ? route('view', path) : route('unavailable');
+  return views.has(path) ? route('view', path, path==='companies'?normalizeLibraryFilters({company:filters.company}):defaultLibraryFilters()) : route('unavailable');
 }
 
 export function workspaceHash({view = 'problems', filters, problemId: id, from} = {}) {
@@ -109,10 +112,11 @@ export function workspaceHash({view = 'problems', filters, problemId: id, from} 
     path = views.has(view) ? view : 'problems';
   }
   if (path.startsWith('problem/') || sources.includes(path)) {
-    for (const key of ['topic', 'level', 'q', 'status', 'sort', 'skill', 'format', 'page', 'pageSize', 'scroll']) {
+    for (const key of ['topic', 'level', 'q', 'status', 'sort', 'skill', 'company', 'format', 'page', 'pageSize', 'scroll']) {
       if (normalized[key] !== defaults[key]) query.set(key, String(normalized[key]));
     }
   }
+  if(path==='companies'&&normalized.company)query.set('company',normalized.company);
   return '#' + path + (query.size ? '?' + query.toString() : '');
 }
 
@@ -158,6 +162,7 @@ function publicMatch(problem, filters) {
   return (filters.topic === 'All' || problem.category === filters.topic) &&
     (filters.level === 'All levels' || problem.difficulty === filters.level) &&
     (!filters.skill || canonicalProblemTags(problem).includes(filters.skill)) &&
+    (!filters.company || matchesCompanyProblem(problem, filters.company)) &&
     (filters.format === 'all' || problemFormat(problem) === filters.format) &&
     `${problem.title || ''} ${tags} ${problem.category || ''} ${problem.id}`.toLowerCase().includes(filters.q.toLowerCase());
 }

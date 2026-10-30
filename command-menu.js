@@ -1,4 +1,4 @@
-const publicViews=new Set(['dashboard','problems','saved','collections','activity','roadmap','review','interview','roles','challenges','plan','diagnostic','learn','community','lab','debug','design','hdl','full-hdl','circuit','cases','progress','insights','account','help','notebook']);
+const publicViews=new Set(['dashboard','problems','saved','collections','activity','roadmap','review','interview','roles','challenges','plan','diagnostic','learn','community','lab','debug','design','hdl','full-hdl','circuit','cases','progress','insights','account','help','notebook','companies']);
 const clean=(value,max=180)=>typeof value==='string'?value.replace(/[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/g,'').slice(0,max):'';
 const folded=value=>clean(value,500).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 export function commandResults({problems=[],actions=[],query='',limit=12}={}){

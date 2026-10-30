@@ -1,3 +1,4 @@
+import {v7EditorialDeepNotes} from './expansion-v7-editorial-notes.js?v=5601ad9fd5efe681';
 // Problem-specific extensions to the released worked derivations.
 // Each entry: an alternate check, a discriminating mistake, a practical consequence.
 export const editorialDeepNotes={
@@ -220,5 +221,6 @@ export const editorialDeepNotes={
  'An equivalent carry construction uses majority twice: c1 = (a0 & b0) | (a0 & ci) | (b0 & ci), then y = (a1 & b1) | ((a1 | b1) & c1). Substituting c1 gives another legal scalar expression and can be checked against all 32 exact integer sums.',
  'Lower-bit carry generation alone does not imply the final carry: A = 1, B = 1, ci = 0 generates c1 but yields exact sum 2 and y = 0.',
  'Lookahead expresses parallel carry dependencies, but this known-bit truth-table proof does not demonstrate a physical speedup. Synthesis cells, fanout and routing determine delay.'
-]
+],
+...v7EditorialDeepNotes
 };

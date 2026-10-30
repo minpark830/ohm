@@ -1,6 +1,6 @@
-import {editorialCatalog,editorialContentSignature} from './editorial-catalog.js?v=f7435ebd4a867484';
-import {editorialGuides} from './editorial-guides.js?v=f7435ebd4a867484';
-import {editorialDeepNotes} from './editorial-deep-notes.js?v=f7435ebd4a867484';
+import {editorialCatalog,editorialContentSignature} from './editorial-catalog.js?v=5601ad9fd5efe681';
+import {editorialGuides} from './editorial-guides.js?v=5601ad9fd5efe681';
+import {editorialDeepNotes} from './editorial-deep-notes.js?v=5601ad9fd5efe681';
 
 const sources = {
   circuits:{title:'MIT 6.01SC — Circuit laws and nodal methods',url:'https://ocw.mit.edu/courses/6-01sc-introduction-to-electrical-engineering-and-computer-science-i-spring-2011/pages/unit-3-circuits/circuits/',supports:'Kirchhoff’s laws and resistor-network methods.'},
@@ -56,13 +56,13 @@ function methodEditorial(item){
  const guide=editorialGuides[item.method],deep=editorialDeepNotes[item.slug];
  if(!guide)throw new Error(`Missing editorial method ${item.method}`);
  return {slug:item.slug,title:item.title,signature:item.signature,version:item.version,kind:'method-guide',method:item.method,difficulty:item.difficulty,
-  author:'Ohm method notes',authoredOn:'2026-10-25',revision:1,revisionNote:'Added a source-guided method comparison and explicit model boundaries for this released problem identity. Hard-problem notes include an additional case-specific derivation or check.',
-  review:'The worked trace is retained from the released solution. Method-family guidance and hard-problem extensions were authored for this catalog; this is not a claim of 216 independent editorial reviews. Primary references support the governing models, not institutional endorsement.',
+  author:'Ohm method notes',authoredOn:item.authoredOn??'2026-10-25',revision:1,revisionNote:'Added a source-guided method comparison and explicit model boundaries for this released problem identity. Hard-problem notes include an additional case-specific derivation or check.',
+  review:'The worked trace is retained from the released solution. Method-family guidance and hard-problem extensions were authored for this catalog; this is not a claim of independent editorial review for each problem. Primary references support the governing models, not institutional endorsement.',
   takeaway:guide.takeaway,alternative:{title:guide.title,steps:guide.steps,equation:item.formula},
   wrongTurns:[{claim:guide.mistake,why:guide.reason,check:guide.check},...(deep?[{claim:'A mistake specific to this question',why:deep[1],check:deep[0]}]:[])],
   design:{title:'What changes in a real design',text:deep?`${deep[2]} ${guide.design}`:guide.design},
   assumptions:guide.assumptions,inputs:item.inputs,workedTrace:item.trace,deepNote:deep?.[0],
-  check:`${guide.check} Case-specific reconstruction: ${item.trace.at(-1)}`,
+  check:`${guide.check} Case-specific reconstruction: ${item.verification??item.trace.at(-1)}`,
   transfer:guide.check,sources:item.sources.length?item.sources:[fallbackSources[categoryForMethod(item.method)]]
  };
 }
