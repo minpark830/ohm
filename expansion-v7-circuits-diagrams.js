@@ -1,4 +1,4 @@
-import {draw,diagram} from './diagram-primitives.js?v=5601ad9fd5efe681';
+import {draw,diagram} from './diagram-primitives.js?v=ceacf964d1420d5c';
 const {path,text,dot,ground,arrow,resistor,capacitor,source,current,box,note}=draw;
 const add=(slug,title,description,caption,body,height=400)=>diagram({slug:`expansion-v7-${slug}`,title,description,caption,body,height});
 const amp=(x,y)=>path(`M${x} ${y-65}L${x+140} ${y}L${x} ${y+65}Z`)+text(x+15,y-30,'+')+text(x+15,y+40,'−');

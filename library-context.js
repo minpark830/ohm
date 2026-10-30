@@ -1,4 +1,4 @@
-import {companyIds,matchesCompanyProblem} from './company-data.js?v=5601ad9fd5efe681';
+import {companyIds,matchesCompanyProblem} from './company-data.js?v=ceacf964d1420d5c';
 
 // Only public browsing preferences belong in the hash. Account progress is
 // supplied when filtering and is never serialized into a route or storage.

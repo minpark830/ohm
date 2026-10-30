@@ -1,4 +1,4 @@
-import {normalizeLibraryFilters} from './library-context.js?v=5601ad9fd5efe681';
+import {normalizeLibraryFilters} from './library-context.js?v=ceacf964d1420d5c';
 
 // Pagination changes only rendered rows. The full filtered selection continues
 // to define problem navigation, recommendations and genuine progress counts.

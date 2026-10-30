@@ -1,4 +1,4 @@
-import {draw,diagram} from './diagram-primitives.js?v=5601ad9fd5efe681';
+import {draw,diagram} from './diagram-primitives.js?v=ceacf964d1420d5c';
 const {path,text,dot,ground,arrow,resistor,capacitor,current,box,npn,mos,note}=draw;
 const make=(name,title,description,caption,body,height=460)=>diagram({slug:`expansion-v7-${name}`,title,description,caption,body,height});
 

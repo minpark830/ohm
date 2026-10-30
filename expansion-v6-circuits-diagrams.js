@@ -1,4 +1,4 @@
-import {draw,diagram} from './diagram-primitives.js?v=5601ad9fd5efe681';
+import {draw,diagram} from './diagram-primitives.js?v=ceacf964d1420d5c';
 const {path,text,dot,ground,arrow,resistor,capacitor,source,box,note}=draw;
 const add=(slug,title,description,caption,body,height=380)=>diagram({slug:`expansion-v6-${slug}`,title,description,caption,body,height});
 const coil=(x,y,xx,yy,label,side=1)=>{const mx=(x+xx)/2,my=(y+yy)/2;return x===xx?path(`M${x} ${y}V${my-32}q22 8 0 16q22 8 0 16q22 8 0 16q22 8 0 16V${yy}`)+text(x+side*23,my+5,label,side<0?'end':'start'):path(`M${x} ${y}H${mx-32}q8-22 16 0q8-22 16 0q8-22 16 0q8-22 16 0H${xx}`)+text(mx,y-28,label);};

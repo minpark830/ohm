@@ -1,4 +1,4 @@
-import {editorialForProblem} from './editorial-data.js?v=5601ad9fd5efe681';
+import {editorialForProblem} from './editorial-data.js?v=ceacf964d1420d5c';
 
 export function editorialMarkup(problem,esc,{discussion=true}={}) {
   const editorial=editorialForProblem(problem);

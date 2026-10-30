@@ -1,4 +1,4 @@
-import {guestActivity,normalizeAccountActivity} from './activity-model.js?v=5601ad9fd5efe681';
+import {guestActivity,normalizeAccountActivity} from './activity-model.js?v=ceacf964d1420d5c';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const count=value=>Number.isSafeInteger(value)&&value>=0?value:0;

@@ -97,6 +97,30 @@ export const companies=freeze([
         "title": "Intersect every setup and hold limit before ending the write",
         "version": 1,
         "focus": "Intersect interface timing constraints"
+      },
+      {
+        "slug": "expansion-v8-diode-rail-clamp-piecewise-check",
+        "title": "A rail clamp is active only after its own inequality is met",
+        "version": 1,
+        "focus": "Check an input clamp’s operating state"
+      },
+      {
+        "slug": "expansion-v8-identify-one-pole-from-three-samples",
+        "title": "Three exact samples reveal both the target and time constant",
+        "version": 1,
+        "focus": "Identify a measured transient model"
+      },
+      {
+        "slug": "expansion-v8-hdl-natural-alignment-valid",
+        "title": "Reject an unaligned transfer and the reserved size code",
+        "version": 1,
+        "focus": "Qualify a memory-port request"
+      },
+      {
+        "slug": "expansion-v8-hdl-two-consumer-fork-release",
+        "title": "Keep a forked beat until both consumers have accepted it",
+        "version": 1,
+        "focus": "Retain a beat through independent handshakes"
       }
     ]
   },
@@ -190,6 +214,30 @@ export const companies=freeze([
         "title": "A partial emitter bypass creates both a zero and a pole",
         "version": 1,
         "focus": "Explain an amplifier’s frequency response"
+      },
+      {
+        "slug": "expansion-v8-tia-capacitance-noise-gain-shape",
+        "title": "Sensor capacitance raises noise gain before feedback flattens it",
+        "version": 1,
+        "focus": "Distinguish noise gain from signal gain"
+      },
+      {
+        "slug": "expansion-v8-sampled-capacitor-thermal-noise-floor",
+        "title": "Reducing switch resistance does not remove the settled noise floor",
+        "version": 1,
+        "focus": "Size a sampled noise floor"
+      },
+      {
+        "slug": "expansion-v8-bjt-source-noise-optimum-bias",
+        "title": "More collector current does not always reduce total input noise",
+        "version": 1,
+        "focus": "Trade voltage and current noise"
+      },
+      {
+        "slug": "expansion-v8-mos-pair-mismatch-integer-cell-area",
+        "title": "Size matched devices by pair variance, then round up the cell count",
+        "version": 1,
+        "focus": "Size a random mismatch budget"
       }
     ]
   },
@@ -283,6 +331,30 @@ export const companies=freeze([
         "title": "Measure delay by the area above the RC step response",
         "version": 1,
         "focus": "Connect RC loading to delay"
+      },
+      {
+        "slug": "expansion-v8-clock-gate-enable-phase",
+        "title": "An enable change during clock high can cut a pulse short",
+        "version": 1,
+        "focus": "Trace clock-gating control timing"
+      },
+      {
+        "slug": "expansion-v8-branch-flush-pipeline-drain",
+        "title": "Flush younger work without discarding the branch",
+        "version": 1,
+        "focus": "Trace a pipeline redirection"
+      },
+      {
+        "slug": "expansion-v8-hdl-crc3-enabled-middle-state",
+        "title": "Advance a streaming CRC tap only when a bit is accepted",
+        "version": 1,
+        "focus": "Derive an enabled datapath update"
+      },
+      {
+        "slug": "expansion-v8-hdl-gray-fifo-next-full",
+        "title": "Compare the next Gray pointer against a full-distance target",
+        "version": 1,
+        "focus": "Derive a crossing flag comparison"
       }
     ]
   },
@@ -376,6 +448,30 @@ export const companies=freeze([
         "title": "Round a retained binary value to nearest, ties to even",
         "version": 1,
         "focus": "Implement a rounding decision"
+      },
+      {
+        "slug": "expansion-v8-sampled-capacitor-thermal-noise-floor",
+        "title": "Reducing switch resistance does not remove the settled noise floor",
+        "version": 1,
+        "focus": "Budget sampled analog noise"
+      },
+      {
+        "slug": "expansion-v8-finite-bandwidth-active-guard-overshoot",
+        "title": "A finite-bandwidth guard can make a capacitive input overshoot",
+        "version": 1,
+        "focus": "Model a dynamic sensor guard"
+      },
+      {
+        "slug": "expansion-v8-mos-source-inductance-die-vgs",
+        "title": "The driver voltage is not always the die gate-source voltage",
+        "version": 1,
+        "focus": "Account for a package parasitic"
+      },
+      {
+        "slug": "expansion-v8-bjt-tail-capacitance-cmrr",
+        "title": "A capacitive tail weakens common-mode rejection at high frequency",
+        "version": 1,
+        "focus": "Check frequency-dependent common-mode leakage"
       }
     ]
   },
@@ -469,6 +565,30 @@ export const companies=freeze([
         "title": "Choose signed or unsigned ordering from the same subtraction",
         "version": 1,
         "focus": "Verify signed and unsigned ordering"
+      },
+      {
+        "slug": "expansion-v8-hdl-natural-alignment-valid",
+        "title": "Reject an unaligned transfer and the reserved size code",
+        "version": 1,
+        "focus": "Qualify a byte-addressed interface"
+      },
+      {
+        "slug": "expansion-v8-branch-flush-pipeline-drain",
+        "title": "Flush younger work without discarding the branch",
+        "version": 1,
+        "focus": "Trace pipeline control and drain"
+      },
+      {
+        "slug": "expansion-v8-hdl-two-consumer-fork-release",
+        "title": "Keep a forked beat until both consumers have accepted it",
+        "version": 1,
+        "focus": "Track independent interface completions"
+      },
+      {
+        "slug": "expansion-v8-hdl-crc3-enabled-middle-state",
+        "title": "Advance a streaming CRC tap only when a bit is accepted",
+        "version": 1,
+        "focus": "Specify a polynomial datapath update"
       }
     ]
   },
@@ -562,6 +682,30 @@ export const companies=freeze([
         "title": "A capacitance curve has different charge and energy integrals",
         "version": 1,
         "focus": "Integrate nonlinear capacitance"
+      },
+      {
+        "slug": "expansion-v8-constant-power-dc-operating-points",
+        "title": "A constant-power load can intersect the source twice",
+        "version": 1,
+        "focus": "Find a load-collapse boundary"
+      },
+      {
+        "slug": "expansion-v8-bridge-rectifier-conduction-average-rms",
+        "title": "A rectifier’s average output does not determine resistor heating",
+        "version": 1,
+        "focus": "Separate average voltage from RMS power"
+      },
+      {
+        "slug": "expansion-v8-mos-source-inductance-die-vgs",
+        "title": "The driver voltage is not always the die gate-source voltage",
+        "version": 1,
+        "focus": "Account for switching source bounce"
+      },
+      {
+        "slug": "expansion-v8-mos-two-slope-body-diode-recovery",
+        "title": "Recover the body-diode triangle before budgeting switching loss",
+        "version": 1,
+        "focus": "Integrate a diode recovery loss"
       }
     ]
   },
@@ -655,6 +799,30 @@ export const companies=freeze([
         "title": "Choose signed or unsigned ordering from the same subtraction",
         "version": 1,
         "focus": "Interpret arithmetic condition flags"
+      },
+      {
+        "slug": "expansion-v8-clock-gate-enable-phase",
+        "title": "An enable change during clock high can cut a pulse short",
+        "version": 1,
+        "focus": "Trace power-control clock timing"
+      },
+      {
+        "slug": "expansion-v8-branch-flush-pipeline-drain",
+        "title": "Flush younger work without discarding the branch",
+        "version": 1,
+        "focus": "Account for pipeline flush overhead"
+      },
+      {
+        "slug": "expansion-v8-hdl-natural-alignment-valid",
+        "title": "Reject an unaligned transfer and the reserved size code",
+        "version": 1,
+        "focus": "Check a memory-interface predicate"
+      },
+      {
+        "slug": "expansion-v8-hdl-gray-fifo-next-full",
+        "title": "Compare the next Gray pointer against a full-distance target",
+        "version": 1,
+        "focus": "Derive a Gray-pointer comparison"
       }
     ]
   }

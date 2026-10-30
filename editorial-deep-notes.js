@@ -1,4 +1,5 @@
-import {v7EditorialDeepNotes} from './expansion-v7-editorial-notes.js?v=5601ad9fd5efe681';
+import {v8EditorialDeepNotes} from './expansion-v8-editorial-notes.js?v=ceacf964d1420d5c';
+import {v7EditorialDeepNotes} from './expansion-v7-editorial-notes.js?v=ceacf964d1420d5c';
 // Problem-specific extensions to the released worked derivations.
 // Each entry: an alternate check, a discriminating mistake, a practical consequence.
 export const editorialDeepNotes={
@@ -222,5 +223,6 @@ export const editorialDeepNotes={
  'Lower-bit carry generation alone does not imply the final carry: A = 1, B = 1, ci = 0 generates c1 but yields exact sum 2 and y = 0.',
  'Lookahead expresses parallel carry dependencies, but this known-bit truth-table proof does not demonstrate a physical speedup. Synthesis cells, fanout and routing determine delay.'
 ],
-...v7EditorialDeepNotes
+...v7EditorialDeepNotes,
+...v8EditorialDeepNotes
 };

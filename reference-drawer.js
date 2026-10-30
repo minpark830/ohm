@@ -1,5 +1,5 @@
-import {createEngineeringTools} from './engineering-tools.js?v=5601ad9fd5efe681';
-import {lessonForProblem} from './learning-data.js?v=5601ad9fd5efe681';
+import {createEngineeringTools} from './engineering-tools.js?v=ceacf964d1420d5c';
+import {lessonForProblem} from './learning-data.js?v=ceacf964d1420d5c';
 
 // These are general references, separate from problem hints and worked solutions.
 // Prefix definitions: https://www.nist.gov/pml/owm/metric-si-prefixes

@@ -1,10 +1,12 @@
-import {v7EditorialGuides} from './expansion-v7-editorial-guides.js?v=5601ad9fd5efe681';
+import {v7EditorialGuides} from './expansion-v7-editorial-guides.js?v=ceacf964d1420d5c';
+import {v8EditorialGuides} from './expansion-v8-editorial-guides.js?v=ceacf964d1420d5c';
 // Original method guides. These explain model choices, not independent reviews of
 // every numerical example. Problem-specific worked traces and deep notes are bound
 // to the released title, prompt and version in editorial-catalog.js.
 const guide=(title,takeaway,steps,mistake,reason,check,design,assumptions)=>({title,takeaway,steps,mistake,reason,check,design,assumptions});
 export const editorialGuides={
  ...v7EditorialGuides,
+  ...v8EditorialGuides,
  node:guide('Audit the node by branch currents','A voltage answer becomes convincing when every connected branch balances.',[
  'Choose ground and a leaving-current convention. A branch from node v to a known source Vs contributes (v − Vs)/R; an injected source contributes a negative leaving current.',
  'Collect the conductance terms before inserting numbers. This exposes parallel branches and the sign of a controlled injection.',

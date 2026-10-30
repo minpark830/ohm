@@ -1,4 +1,4 @@
-import {reviewQueue, utcDate} from './practice-model.js?v=5601ad9fd5efe681';
+import {reviewQueue, utcDate} from './practice-model.js?v=ceacf964d1420d5c';
 
 export const diagnosticTopics = [
   {name:'Circuit analysis',icon:'circuit',slugs:['one-loop-two-resistors','balance-the-node'],check:'Choose a current direction before applying KCL or KVL.'},

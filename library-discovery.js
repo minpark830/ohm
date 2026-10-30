@@ -1,6 +1,6 @@
-import {libraryTopics,defaultLibraryFilters,normalizeLibraryFilters,filterProblems,canonicalProblemTags,problemFormat,attemptedProblemIds} from './library-context.js?v=5601ad9fd5efe681';
+import {libraryTopics,defaultLibraryFilters,normalizeLibraryFilters,filterProblems,canonicalProblemTags,problemFormat,attemptedProblemIds} from './library-context.js?v=ceacf964d1420d5c';
 
-import {companies,companyFor,companyEvidence} from './company-data.js?v=5601ad9fd5efe681';
+import {companies,companyFor,companyEvidence} from './company-data.js?v=ceacf964d1420d5c';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const compareText=new Intl.Collator('en',{numeric:true,sensitivity:'base'});
