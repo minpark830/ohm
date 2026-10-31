@@ -1,5 +1,5 @@
-import {debuggingScenarios,debugScenario,createDebugCase,measureDebugCase,diagnoseDebugCase,debugFormat} from './debugging-model.js?v=ceacf964d1420d5c';
-import {emptyDebugState,normalizeDebugState} from './debugging-state.js?v=ceacf964d1420d5c';
+import {debuggingScenarios,debugScenario,createDebugCase,measureDebugCase,diagnoseDebugCase,debugFormat} from './debugging-model.js?v=a8dd77a14a7d6aad';
+import {emptyDebugState,normalizeDebugState} from './debugging-state.js?v=a8dd77a14a7d6aad';
 
 // Every value embedded in a drawing is authored here; report text and account data never enter this module.
 const path=d=>`<path d="${d}"/>`;

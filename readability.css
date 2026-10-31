@@ -1,0 +1,158 @@
+/* Semantic reading colors stay legible on the app's paper, page and tinted surfaces. */
+:root {
+  --muted: #58665e;
+  --difficulty-easy: #256446;
+  --difficulty-medium: #805900;
+  --difficulty-hard: #a33e3a;
+  --focus: #1e6b4b;
+  --action-bg: #237555;
+  --action-hover: #17533d;
+}
+
+.theme-dark {
+  --muted: #b7c6bc;
+  --difficulty-easy: #a2d6b6;
+  --difficulty-medium: #f0cf8d;
+  --difficulty-hard: #ffb4ac;
+  --focus: #9fddbb;
+  --action-bg: #2c704f;
+  --action-hover: #245e42;
+}
+
+.problem-tags,
+.number,
+.problem-table th,
+.nav-label,
+.bottom-note,
+.mini-bar .mono {
+  color: var(--muted);
+}
+
+.difficulty.Easy { color: var(--difficulty-easy); }
+.difficulty.Medium { color: var(--difficulty-medium); }
+.difficulty.Hard { color: var(--difficulty-hard); }
+
+.button.primary,
+.theme-dark .button.primary {
+  background: var(--action-bg);
+  border-color: var(--action-bg);
+  color: #fff;
+}
+
+.button.primary:hover,
+.theme-dark .button.primary:hover {
+  background: var(--action-hover);
+  border-color: var(--action-hover);
+}
+
+/* Supporting information should remain readable without competing with titles. */
+.problem-tags { font-size: 12px; line-height: 1.65; }
+.problem-table th { font-size: 12px; font-weight: 600; }
+.number { font-size: 12px; }
+.library-page .ld-filter { font-size: 12px; }
+.library-page .ld-search input,
+.library-page .ld-filter .select { font-size: 14px; }
+.library-page .ld-topic { font-size: 12px; }
+.ld-result-count,
+.ld-chip,
+.ld-status-note,
+.library-pager,
+.library-pager select,
+.profile p,
+.scratch-footer,
+.given small,
+.work-body .hint-text,
+.walk-diagram figcaption,
+.walkthrough > .tiny,
+.related-practice small { font-size: 12px; }
+
+.company-problem-topic,
+.company-problems li p,
+.company-problems .difficulty,
+.company-source p,
+.company-source-link,
+.company-note,
+.company-checked,
+.company-evidence,
+.workspace-company-context > span,
+.workspace-company-context button,
+.ld-company-note p { font-size: 12px; }
+
+.company-problems li button { font-size: 14px; }
+.company-hero p,
+.company-intro p { font-size: 13px; }
+
+/* Main problem prose remains 16px; worked explanations have a comfortable reading size. */
+.problem-content .editorial p,
+.problem-content .editorial li,
+.editorial-equation { font-size: 14px; line-height: 1.85; }
+.editorial h3 { font-size: 15px; }
+.editorial-section > summary { font-size: 14px; }
+.editorial-takeaway { font-size: 14px !important; }
+.editorial-review-note,
+.editorial-revision,
+.editorial-help-note,
+.editorial-sources p,
+.editorial-discussion-link p,
+.editorial-note p { font-size: 12px !important; }
+.editorial-check-badge,
+.editorial-provenance > div,
+.editorial-discussion-link .button,
+.editorial-note .button { font-size: 12px; }
+.ce-help,
+.code-description { font-size: 12px; line-height: 1.7; }
+
+/* Keep the focus indicator outside a complete control, rather than clipping it inside. */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.answer-input:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+  border-color: var(--focus);
+}
+
+.answer-input:focus-within input:focus-visible { outline: none; }
+
+.ohm-code-editor:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+  box-shadow: none;
+}
+
+.bookmark {
+  display: inline-grid;
+  place-items: center;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 6px;
+  border-radius: 6px;
+  color: var(--muted);
+}
+
+.bookmark.saved { color: var(--green); }
+.bookmark:hover { background: var(--mint); }
+
+@media (max-width: 700px) {
+  .bookmark { min-width: 40px; min-height: 40px; }
+  .workspace-header .icon-button,
+  .workspace-header .workspace-shortcuts { min-width: 36px; min-height: 36px; }
+}
+
+@media (forced-colors: active) {
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  summary:focus-visible,
+  .answer-input:focus-within,
+  .ohm-code-editor:focus-within { outline-color: Highlight; }
+}

@@ -1,4 +1,4 @@
-import {notebookReasons,notebookLimits,emptyNotebookDraft,emptyNotebookState,normalizeNotebookState,setNotebookDraft,saveNotebookEntry,archiveNotebookEntry,reviewNotebookEntry} from './notebook-model.js?v=ceacf964d1420d5c';
+import {notebookReasons,notebookLimits,emptyNotebookDraft,emptyNotebookState,normalizeNotebookState,setNotebookDraft,saveNotebookEntry,archiveNotebookEntry,reviewNotebookEntry} from './notebook-model.js?v=a8dd77a14a7d6aad';
 
 const escapeText=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const filters=[['open','To revisit'],['reviewed','Reviewed'],['all','All active'],['archived','Archived']];

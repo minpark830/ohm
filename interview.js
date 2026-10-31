@@ -1,8 +1,8 @@
-import {roleTrackById,resolveRoleTrack} from './role-track-data.js?v=ceacf964d1420d5c';
+import {roleTrackById,resolveRoleTrack} from './role-track-data.js?v=a8dd77a14a7d6aad';
 import {
   interviewTopics, selectInterviewProblems, createInterviewSession,
   remainingMs, recordInterviewAnswer, finishInterview, sessionScore
-} from './interview-model.js?v=ceacf964d1420d5c';
+} from './interview-model.js?v=a8dd77a14a7d6aad';
 
 const presets = {
   mixed: {label: 'Mixed interview', note: 'A little of everything', topics: [...interviewTopics]},

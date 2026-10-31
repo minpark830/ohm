@@ -1,4 +1,4 @@
-import {lessons,drillLabels,lessonForProblem} from './learning-data.js?v=ceacf964d1420d5c';
+import {lessons,drillLabels,lessonForProblem} from './learning-data.js?v=a8dd77a14a7d6aad';
 export function createLearning({shell,esc,icon,api,getProblems,openProblem,navigate,isActive,toast}){
  let lessonId='foundations',kind='divider',variation=null,answers={},result=null,busy=false,error='',request=0;
  const randomSeed=()=>crypto.getRandomValues(new Uint32Array(1))[0]&2147483647;

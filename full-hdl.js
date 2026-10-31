@@ -1,9 +1,9 @@
-import {createExecutionClient} from './execution-client.js?v=ceacf964d1420d5c';
-import {parseHDLVectors} from './hdl-vectors.js?v=ceacf964d1420d5c';
-import {enhanceCodeEditor,createResizablePanels} from './code-editor.js?v=ceacf964d1420d5c';
-import {emptyFullHDLState,normalizeFullHDLState} from './full-hdl-state.js?v=ceacf964d1420d5c';
-import {fullHDLExercises} from './full-hdl-catalog.js?v=ceacf964d1420d5c';
-export {fullHDLExercises} from './full-hdl-catalog.js?v=ceacf964d1420d5c';
+import {createExecutionClient} from './execution-client.js?v=a8dd77a14a7d6aad';
+import {parseHDLVectors} from './hdl-vectors.js?v=a8dd77a14a7d6aad';
+import {enhanceCodeEditor,createResizablePanels} from './code-editor.js?v=a8dd77a14a7d6aad';
+import {emptyFullHDLState,normalizeFullHDLState} from './full-hdl-state.js?v=a8dd77a14a7d6aad';
+import {fullHDLExercises} from './full-hdl-catalog.js?v=a8dd77a14a7d6aad';
+export {fullHDLExercises} from './full-hdl-catalog.js?v=a8dd77a14a7d6aad';
 export function createFullHDLWorkbench({shell,esc,icon=()=>'',toast=()=>{},isActive=()=>true,api,storage=null}){
  const client=createExecutionClient({api});let id='fifo',codes={},stimulus={},sourceEditor=null,vectorEditor=null,panels=null,result=null,error='',draftError='',running=false,controller=null,generation=0,capability=null,loading=false,hydrated=!storage,confirmLoad=false,lastLocked=null;
  const exercise=()=>fullHDLExercises.find(x=>x.id===id);

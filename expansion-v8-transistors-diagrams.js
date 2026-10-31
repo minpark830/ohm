@@ -1,4 +1,4 @@
-import {draw,diagram} from './diagram-primitives.js?v=ceacf964d1420d5c';
+import {draw,diagram} from './diagram-primitives.js?v=a8dd77a14a7d6aad';
 const {path,text,dot,ground,arrow,resistor,capacitor,source,box,npn,mos,note}=draw;
 const make=(name,title,description,caption,body,height=450)=>diagram({slug:`expansion-v8-${name}`,title,description,caption,body,height});
 const inductor=(x,y,xx,label)=>{const m=(x+xx)/2;return path(`M${x} ${y}H${m-36}a9 9 0 0 1 18 0a9 9 0 0 1 18 0a9 9 0 0 1 18 0a9 9 0 0 1 18 0H${xx}`)+text(m,y-24,label);};

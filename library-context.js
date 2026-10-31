@@ -1,4 +1,5 @@
-import {companyIds,matchesCompanyProblem} from './company-data.js?v=ceacf964d1420d5c';
+import {canonicalSkill} from './skill-taxonomy.js?v=a8dd77a14a7d6aad';
+import {companyIds,matchesCompanyProblem} from './company-data.js?v=a8dd77a14a7d6aad';
 
 // Only public browsing preferences belong in the hash. Account progress is
 // supplied when filtering and is never serialized into a route or storage.
@@ -43,7 +44,7 @@ export function normalizeLibraryFilters(raw = {}) {
     q: searchText(value.q),
     status: pick(statuses, value.status, 'all'),
     sort: pick(sorts, value.sort, 'recommended'),
-    skill: searchText(value.skill, 80).trim(),
+    skill: canonicalSkill(value.skill),
     company: pick(companyIds, value.company, ''),
     format: pick(formats, value.format, 'all'),
     page: ['string','number'].includes(typeof value.page)&&/^(?:[1-9]\d{0,4}|100000)$/.test(String(value.page)) ? Number(value.page) : 1,
@@ -134,11 +135,11 @@ function idSet(values) {
 }
 
 export function canonicalProblemTags(problem) {
-  // A skill is an exact, bounded tag from the published catalog, never a
-  // generated company label or an inferred measure of interview frequency.
+  // Normalize only the taxonomy’s explicit spelling aliases. Unknown owner
+  // labels remain bounded and exact; no employer frequency is inferred.
   return [...new Set((Array.isArray(problem?.tags) ? problem.tags : [])
     .filter(tag => typeof tag === 'string')
-    .map(tag => searchText(tag, 80).trim()).filter(Boolean))].slice(0, 40);
+    .map(canonicalSkill).filter(Boolean))].slice(0, 40);
 }
 
 export function problemFormat(problem) {

@@ -1,4 +1,4 @@
-import {companies,companyFor,companyEvidence,companySelection} from './company-data.js?v=ceacf964d1420d5c';
+import {companies,companyFor,companyEvidence,companySelection} from './company-data.js?v=a8dd77a14a7d6aad';
 
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeLink=value=>{try{const url=new URL(value);return url.protocol==='https:'?escape(url.href):'';}catch{return '';}};

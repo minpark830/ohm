@@ -1,5 +1,5 @@
-import {v8EditorialDeepNotes} from './expansion-v8-editorial-notes.js?v=ceacf964d1420d5c';
-import {v7EditorialDeepNotes} from './expansion-v7-editorial-notes.js?v=ceacf964d1420d5c';
+import {v8EditorialDeepNotes} from './expansion-v8-editorial-notes.js?v=a8dd77a14a7d6aad';
+import {v7EditorialDeepNotes} from './expansion-v7-editorial-notes.js?v=a8dd77a14a7d6aad';
 // Problem-specific extensions to the released worked derivations.
 // Each entry: an alternate check, a discriminating mistake, a practical consequence.
 export const editorialDeepNotes={

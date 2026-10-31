@@ -1,4 +1,4 @@
-import {roleTracks, resolveRoleTrack} from './role-track-data.js?v=ceacf964d1420d5c';
+import {roleTracks, resolveRoleTrack} from './role-track-data.js?v=a8dd77a14a7d6aad';
 
 export function createRoleTracks({shell, esc, icon, getProblems, getProgress, openProblem, navigate, prepareInterview}) {
   let trackId = 'analog';
