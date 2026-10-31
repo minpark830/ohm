@@ -1,5 +1,5 @@
-import {v8EditorialCatalog} from './expansion-v8-editorials.js?v=a8dd77a14a7d6aad';
-import {v7EditorialCatalog} from './expansion-v7-editorials.js?v=a8dd77a14a7d6aad';
+import {v8EditorialCatalog} from './expansion-v8-editorials.js?v=22c97c590ebdf290';
+import {v7EditorialCatalog} from './expansion-v7-editorials.js?v=22c97c590ebdf290';
 // Released problem identities and worked traces. Source problem data is immutable.
 // These are source-guided teaching notes; the separately checked editorials retain their own provenance.
 export const editorialCatalog = [

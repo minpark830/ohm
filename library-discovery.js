@@ -1,7 +1,7 @@
-import {skillPickerMarkup} from './skill-picker.js?v=a8dd77a14a7d6aad';
-import {libraryTopics,defaultLibraryFilters,normalizeLibraryFilters,filterProblems,canonicalProblemTags,problemFormat,attemptedProblemIds} from './library-context.js?v=a8dd77a14a7d6aad';
+import {skillPickerMarkup} from './skill-picker.js?v=22c97c590ebdf290';
+import {libraryTopics,defaultLibraryFilters,normalizeLibraryFilters,filterProblems,canonicalProblemTags,problemFormat,attemptedProblemIds} from './library-context.js?v=22c97c590ebdf290';
 
-import {companies,companyFor,companyEvidence} from './company-data.js?v=a8dd77a14a7d6aad';
+import {companies,companyFor,companyEvidence} from './company-data.js?v=22c97c590ebdf290';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const compareText=new Intl.Collator('en',{numeric:true,sensitivity:'base'});

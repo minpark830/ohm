@@ -1,5 +1,5 @@
-import {collectionLimits} from './collections-model.js?v=a8dd77a14a7d6aad';
-import {emptyCollectionsState,normalizeCollectionsState,emptyCollectionDraft,saveCollection,setCollectionProblem,moveCollectionProblem,deleteCollection,restoreCollection,purgeCollection,collectionSummary,publicCollectionCatalog} from './collections-model.js?v=a8dd77a14a7d6aad';
+import {collectionLimits} from './collections-model.js?v=22c97c590ebdf290';
+import {emptyCollectionsState,normalizeCollectionsState,emptyCollectionDraft,saveCollection,setCollectionProblem,moveCollectionProblem,deleteCollection,restoreCollection,purgeCollection,collectionSummary,publicCollectionCatalog} from './collections-model.js?v=22c97c590ebdf290';
 
 export function createCollections({shell,esc,icon=()=>'',toast=()=>{},getProblems=()=>[],getProgress=()=>({}),storage=null,navigate=()=>{},openProblem=()=>{},isActive=()=>true,now=()=>Date.now()}){
  let state=emptyCollectionsState(),hydrated=!storage,confirm=null,confirmRemote=false,lastLocked=null,picker=null,pickerProblem=null,pickerFocus=null;

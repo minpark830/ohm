@@ -1,5 +1,5 @@
-import {v7EditorialGuides} from './expansion-v7-editorial-guides.js?v=a8dd77a14a7d6aad';
-import {v8EditorialGuides} from './expansion-v8-editorial-guides.js?v=a8dd77a14a7d6aad';
+import {v7EditorialGuides} from './expansion-v7-editorial-guides.js?v=22c97c590ebdf290';
+import {v8EditorialGuides} from './expansion-v8-editorial-guides.js?v=22c97c590ebdf290';
 // Original method guides. These explain model choices, not independent reviews of
 // every numerical example. Problem-specific worked traces and deep notes are bound
 // to the released title, prompt and version in editorial-catalog.js.

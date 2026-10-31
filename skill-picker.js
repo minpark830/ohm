@@ -1,4 +1,4 @@
-import {canonicalSkill,cleanSkillLabel,skillConceptFor,skillSearchTerms,skillSearchText,skillGroups} from './skill-taxonomy.js?v=a8dd77a14a7d6aad';
+import {canonicalSkill,cleanSkillLabel,skillConceptFor,skillSearchTerms,skillSearchText,skillGroups} from './skill-taxonomy.js?v=22c97c590ebdf290';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const compare=new Intl.Collator('en',{numeric:true,sensitivity:'base'});
 const batchSize=18;

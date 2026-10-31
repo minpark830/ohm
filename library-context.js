@@ -1,5 +1,5 @@
-import {canonicalSkill} from './skill-taxonomy.js?v=a8dd77a14a7d6aad';
-import {companyIds,matchesCompanyProblem} from './company-data.js?v=a8dd77a14a7d6aad';
+import {canonicalSkill} from './skill-taxonomy.js?v=22c97c590ebdf290';
+import {companyIds,matchesCompanyProblem} from './company-data.js?v=22c97c590ebdf290';
 
 // Only public browsing preferences belong in the hash. Account progress is
 // supplied when filtering and is never serialized into a route or storage.

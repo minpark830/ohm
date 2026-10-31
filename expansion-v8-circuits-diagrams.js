@@ -1,4 +1,4 @@
-import {draw,diagram} from './diagram-primitives.js?v=a8dd77a14a7d6aad';
+import {draw,diagram} from './diagram-primitives.js?v=22c97c590ebdf290';
 const {path,text,dot,ground,arrow,resistor,capacitor,source,box,note}=draw;
 const add=(slug,title,description,caption,body,height=410)=>diagram({slug:`expansion-v8-${slug}`,title,description,caption,body,height});
 const diode=(x,y,xx,yy)=>{const mx=(x+xx)/2,my=(y+yy)/2,length=Math.hypot(xx-x,yy-y),angle=Math.atan2(yy-y,xx-x)*180/Math.PI;return `<g transform="translate(${mx} ${my}) rotate(${angle})">${path(`M${-length/2} 0H-12M-12-12V12L9 0Z M12-15V15M12 0H${length/2}`)}</g>`;};

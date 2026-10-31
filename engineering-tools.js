@@ -1,3 +1,5 @@
+import {createPhasorTool} from './phasor-tool.js?v=22c97c590ebdf290';
+
 // General, browser-only calculations. No problem values, grading data, API
 // calls or browser storage participate in these tools.
 export const engineeringPrefixes=Object.freeze([
@@ -61,7 +63,7 @@ export function engineeringFormat(value,unit=''){
  return `${Number((value/10**exponent).toPrecision(7))}${unit?' '+prefix(exponent).symbol+unit:exponent?' × 10^'+exponent:''}`;
 }
 
-const toolNames=Object.freeze({resistors:'Two resistors',rc:'RC time & cutoff',decibels:'Ratio ↔ decibels',prefixes:'SI prefix conversion'});
+const toolNames=Object.freeze({phasors:'Phasors & complex numbers',resistors:'Two resistors',rc:'RC time & cutoff',decibels:'Ratio ↔ decibels',prefixes:'SI prefix conversion'});
 const defaults=()=>({selected:'resistors',values:{
  resistors:{r1:'',r1Prefix:'3',r2:'',r2Prefix:'3'},
  rc:{r:'',rPrefix:'3',c:'',cPrefix:'-9'},
@@ -77,12 +79,13 @@ const notes={resistors:'Ideal, nonnegative resistors. A zero-ohm resistor shorts
 
 export function createEngineeringTools({esc=fallbackEscape}={}){
  let state=defaults();
+ const phasors=createPhasorTool({esc,parseNumber:parseToolNumber});
  const selectedValues=()=>state.values[state.selected];
  const option=(value,label,current)=>`<option value="${esc(value)}"${value===current?' selected':''}>${esc(label)}</option>`;
  function select(field,label,values,current){return `<label class="ee-tool-select-label" for="ee-tool-${field}"><span>${esc(label)}</span><select id="ee-tool-${field}" data-ee-tool-field="${field}">${values.map(([value,text])=>option(value,text,current)).join('')}</select></label>`;}
  const prefixOptions=(exponents,unit)=>exponents.map(exponent=>[exponent,`${prefix(exponent).symbol}${unit} · 10^${exponent}`]);
  function number(field,label,value,placeholder){const validation=result(),invalid=validation.kind==='error'&&validation.field===field;return `<label class="ee-tool-number-label" for="ee-tool-${field}"><span>${esc(label)}</span><input type="text" inputmode="text" autocapitalize="off" spellcheck="false" autocomplete="off" id="ee-tool-${field}" data-ee-tool-field="${field}" maxlength="64" aria-describedby="ee-tool-number-help" aria-invalid="${invalid}"${invalid?' aria-errormessage="ee-tool-result"':''} value="${esc(value)}" placeholder="${esc(placeholder)}"></label>`;}
- function fieldsMarkup(){const value=selectedValues();
+ function fieldsMarkup(){if(state.selected==='phasors')return phasors.fieldsMarkup();const value=selectedValues();
   if(state.selected==='resistors')return `<div class="ee-tool-pair">${number('r1','R1',value.r1,'e.g. 4.7')}${select('r1Prefix','R1 unit',prefixOptions(resistorPrefixes,'Ω'),value.r1Prefix)}</div><div class="ee-tool-pair">${number('r2','R2',value.r2,'e.g. 10')}${select('r2Prefix','R2 unit',prefixOptions(resistorPrefixes,'Ω'),value.r2Prefix)}</div>`;
   if(state.selected==='rc')return `<div class="ee-tool-pair">${number('r','Resistance R',value.r,'e.g. 10')}${select('rPrefix','Resistance unit',prefixOptions(resistorPrefixes,'Ω'),value.rPrefix)}</div><div class="ee-tool-pair">${number('c','Capacitance C',value.c,'e.g. 100')}${select('cPrefix','Capacitance unit',prefixOptions(capacitorPrefixes,'F'),value.cPrefix)}</div>`;
   if(state.selected==='decibels')return `<div class="ee-tool-select-grid">${select('kind','Ratio type',[['amplitude','Amplitude magnitude · 20 log10'],['power','Power · 10 log10']],value.kind)}${select('direction','Convert from',[['ratio-to-db','Ratio to dB'],['db-to-ratio','dB to ratio']],value.direction)}</div>${number('value',value.direction==='ratio-to-db'?'Ratio magnitude · output / input':'Decibels · dB',value.value,value.direction==='ratio-to-db'?'e.g. 2':'e.g. 6.0206')}`;
@@ -90,6 +93,7 @@ export function createEngineeringTools({esc=fallbackEscape}={}){
   return `${number('value','Value',value.value,'e.g. 2.5')}<div class="ee-tool-select-grid">${select('unit','Physical unit',selectorValues.prefixes.unit.map(unit=>[unit,unit]),value.unit)}${select('from','From prefix',choices,value.from)}${select('to','To prefix',choices,value.to)}</div>`;
  }
  function result(){
+  if(state.selected==='phasors')return phasors.result();
   const value=selectedValues(),numbers={};let missing=false,field=null;
   try{
    for(const key of numericFields[state.selected]){field=key;if(!value[key].trim()){missing=true;continue;}numbers[key]=parseToolNumber(value[key],{label:labels[key],positive:state.selected==='rc'||state.selected==='decibels'&&value.direction==='ratio-to-db',nonnegative:state.selected==='resistors'});}
@@ -103,25 +107,37 @@ export function createEngineeringTools({esc=fallbackEscape}={}){
   }catch(error){return {kind:'error',field,message:error.message,rows:[]};}
  }
  function outputMarkup(data=result()){
+  if(state.selected==='phasors')return phasors.outputMarkup(data);
   if(data.kind==='empty')return '<p class="ee-tool-empty">Enter the values above to calculate. Scientific notation such as 1e-6 is supported.</p>';
   if(data.kind==='error')return `<p class="ee-tool-error">${esc(data.message)}</p>`;
   return `<dl class="ee-tool-results">${data.rows.map(([label,value])=>`<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl><p class="ee-tool-rounding">Displayed results use up to 7 significant digits.</p>`;
  }
- function methodMarkup(){return `<summary>Formula & assumptions</summary><pre>${esc(formulas[state.selected])}</pre><p>${esc(notes[state.selected])}</p><p><a href="https://www.nist.gov/pml/owm/metric-si-prefixes" target="_blank" rel="noopener noreferrer">NIST prefix definitions ↗</a>${state.selected==='decibels'?' · <a href="https://www.analog.com/en/resources/glossary/db.html" target="_blank" rel="noopener noreferrer">Decibel reference ↗</a>':''}</p>`;}
- function markup(){return `<section class="ee-tools" data-ee-tools aria-labelledby="ee-tool-title"><div class="ee-tool-intro"><h3 id="ee-tool-title">Check a calculation.</h3><p>General tools for your own values. They do not reveal or submit this problem’s answer.</p></div><label class="ee-tool-selector" for="ee-tool-kind"><span>Calculation</span><select id="ee-tool-kind" data-ee-tool-kind>${Object.entries(toolNames).map(([kind,name])=>option(kind,name,state.selected)).join('')}</select></label><div class="ee-tool-fields" data-ee-tool-fields>${fieldsMarkup()}</div><p id="ee-tool-number-help" class="ee-tool-help">Use numbers only; choose units separately. Expressions, pasted unit text and code are not evaluated.</p><div id="ee-tool-result" class="ee-tool-output" role="status" aria-live="polite" aria-atomic="true" data-ee-tool-result>${outputMarkup()}</div><details class="ee-tool-method">${methodMarkup()}</details><button type="button" class="button ee-tool-clear" data-ee-tool-action="clear-current">Clear this calculation</button><p class="ee-tool-privacy">Values stay in this tab’s memory. They are not saved to your account, browser storage or problem draft.</p></section>`;}
+ function methodMarkup(){if(state.selected==='phasors')return phasors.methodMarkup();return `<summary>Formula & assumptions</summary><pre>${esc(formulas[state.selected])}</pre><p>${esc(notes[state.selected])}</p><p><a href="https://www.nist.gov/pml/owm/metric-si-prefixes" target="_blank" rel="noopener noreferrer">NIST prefix definitions ↗</a>${state.selected==='decibels'?' · <a href="https://www.analog.com/en/resources/glossary/db.html" target="_blank" rel="noopener noreferrer">Decibel reference ↗</a>':''}</p>`;}
+ function helpText(){return state.selected==='phasors'?'Use numbers only and keep physical units consistent. Angles are in degrees. Expressions, unit text and code are not evaluated.':'Use numbers only; choose units separately. Expressions, pasted unit text and code are not evaluated.';}
+ function markup(){return `<section class="ee-tools" data-ee-tools aria-labelledby="ee-tool-title"><div class="ee-tool-intro"><h3 id="ee-tool-title">Check a calculation.</h3><p>General tools for your own values. They do not reveal or submit this problem’s answer.</p></div><label class="ee-tool-selector" for="ee-tool-kind"><span>Calculation</span><select id="ee-tool-kind" data-ee-tool-kind>${Object.entries(toolNames).map(([kind,name])=>option(kind,name,state.selected)).join('')}</select></label><div class="ee-tool-fields" data-ee-tool-fields>${fieldsMarkup()}</div><p id="ee-tool-number-help" class="ee-tool-help">${helpText()}</p><div id="ee-tool-result" class="ee-tool-output" tabindex="-1" role="status" aria-live="polite" aria-atomic="true" data-ee-tool-result>${outputMarkup()}</div><details class="ee-tool-method">${methodMarkup()}</details><button type="button" class="button ee-tool-clear" data-ee-tool-action="clear-current">Clear this calculation</button><p class="ee-tool-privacy">Values stay in this tab’s memory. They are not saved to your account, browser storage or problem draft.</p></section>`;}
  function update(root,{fields=false}={}){
   if(!root)return;
+  const help=root.querySelector('#ee-tool-number-help');if(help)help.textContent=helpText();
   if(fields){const host=root.querySelector('[data-ee-tool-fields]');if(host)host.innerHTML=fieldsMarkup();const method=root.querySelector('.ee-tool-method');if(method)method.innerHTML=methodMarkup();}
   const data=result(),output=root.querySelector('[data-ee-tool-result]');if(output)output.innerHTML=outputMarkup(data);
   for(const input of root.querySelectorAll('input[data-ee-tool-field]')){const invalid=data.kind==='error'&&data.field===input.dataset.eeToolField;input.setAttribute('aria-invalid',String(invalid));if(invalid)input.setAttribute('aria-errormessage','ee-tool-result');else input.removeAttribute('aria-errormessage');}
  }
- function onInput(event){const target=event.target,field=target?.dataset?.eeToolField;if(!numericFields[state.selected].includes(field))return false;const root=target.closest?.('[data-ee-tools]');if(!root)return false;selectedValues()[field]=String(target.value).slice(0,64);update(root);return true;}
+ function onInput(event){const target=event.target,field=target?.dataset?.eeToolField;const root=target?.closest?.('[data-ee-tools]');if(!root)return false;if(state.selected==='phasors'){if(!phasors.onInput(field,target.value))return false;update(root);return true;}if(!numericFields[state.selected].includes(field))return false;selectedValues()[field]=String(target.value).slice(0,64);update(root);return true;}
  function onChange(event){const target=event.target,root=target?.closest?.('[data-ee-tools]');if(!root)return false;
   if(target.dataset?.eeToolKind!==undefined){if(Object.hasOwn(toolNames,target.value)){state.selected=target.value;update(root,{fields:true});}return true;}
-  const field=target.dataset?.eeToolField,allowed=selectorValues[state.selected];if(!Object.hasOwn(allowed,field))return false;
+  const field=target.dataset?.eeToolField;if(state.selected==='phasors'){if(!phasors.onChange(field,target.value))return false;update(root,{fields:true});root.querySelector('#ee-tool-'+field)?.focus();return true;}const allowed=selectorValues[state.selected];if(!Object.hasOwn(allowed,field))return false;
   if(allowed[field].includes(target.value)){selectedValues()[field]=target.value;update(root,{fields:state.selected==='decibels'&&field==='direction'});}else{target.value=selectedValues()[field];}return true;
  }
- function onClick(event){const action=event.target?.closest?.('[data-ee-tool-action]');if(!action)return false;if(action.dataset.eeToolAction==='clear-current'){state.values[state.selected]=defaults().values[state.selected];update(action.closest('[data-ee-tools]'),{fields:true});}return true;}
- function clear(){state=defaults();}
- return {markup,onInput,onChange,onClick,clear,reset:clear,get state(){return structuredClone(state);}};
+ function onClick(event){
+  const action=event.target?.closest?.('[data-ee-tool-action]');if(!action)return false;
+  if(action.dataset.eeToolAction==='phasor-example'&&state.selected==='phasors'){
+   const key=action.dataset.eeToolExample,root=action.closest('[data-ee-tools]');
+   if(phasors.example(key)){update(root,{fields:true});const output=root?.querySelector('[data-ee-tool-result]');output?.focus?.({preventScroll:true});output?.scrollIntoView?.({block:'start',inline:'nearest'});}
+   return true;
+  }
+  if(action.dataset.eeToolAction==='clear-current'){if(state.selected==='phasors')phasors.clear();else state.values[state.selected]=defaults().values[state.selected];update(action.closest('[data-ee-tools]'),{fields:true});}
+  return true;
+ }
+ function clear(){state=defaults();phasors.clear();}
+ return {markup,onInput,onChange,onClick,clear,reset:clear,get state(){return {...structuredClone(state),phasors:phasors.state};}};
 }

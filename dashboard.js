@@ -1,4 +1,4 @@
-import {dashboardSnapshot} from './dashboard-model.js?v=a8dd77a14a7d6aad';
+import {dashboardSnapshot} from './dashboard-model.js?v=22c97c590ebdf290';
 
 export function createDashboard({shell, esc, icon, getProblems, getProgress, getSession, getInterviewState, getDebugState, getDesignState, navigate, openProblem, weeklyPulse = null, isActive = () => true}) {
   const read = getter => { try { return getter?.(); } catch { return undefined; } };
